@@ -3,6 +3,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 MODULE_PATH = Path(__file__).with_name("sscfg_publisher.py")
@@ -53,6 +54,41 @@ class SouthsidePublisherTests(unittest.TestCase):
         with self.assertRaises(sp.PublishError):
             sp.source_file_from_path(repo_dir, external_path)
 
+    def test_write_source_text_updates_pack_json(self) -> None:
+        repo_dir = self.make_repo()
+        path = self.write_pack(repo_dir, "demo.json", '{"a":1}\n')
+
+        sp.write_source_text(repo_dir, "packs/demo.json", '{\n  "a": 2\n}')
+
+        self.assertEqual(path.read_text(encoding="utf-8"), '{\n  "a": 2\n}\n')
+
+    def test_write_source_text_rejects_invalid_json(self) -> None:
+        repo_dir = self.make_repo()
+        path = self.write_pack(repo_dir, "demo.json", '{"a":1}\n')
+        before = path.read_text(encoding="utf-8")
+
+        with self.assertRaises(sp.PublishError):
+            sp.write_source_text(repo_dir, "packs/demo.json", '{"a": }')
+
+        self.assertEqual(path.read_text(encoding="utf-8"), before)
+
+    def test_create_source_file_creates_json_under_packs(self) -> None:
+        repo_dir = self.make_repo()
+
+        source = sp.create_source_file(repo_dir, "new_pack", '{"ok":true}')
+
+        self.assertEqual(source.rel_path, "packs/new_pack.json")
+        self.assertTrue((repo_dir / "packs" / "new_pack.json").exists())
+        self.assertEqual((repo_dir / "packs" / "new_pack.json").read_text(encoding="utf-8"), '{"ok":true}\n')
+
+    def test_delete_source_file_removes_unpublished_json(self) -> None:
+        repo_dir = self.make_repo()
+        pack_path = self.write_pack(repo_dir, "demo.json", '{"a":1}\n')
+
+        sp.delete_source_file(repo_dir, "packs/demo.json")
+
+        self.assertFalse(pack_path.exists())
+
     def test_rebuild_index_preserves_pack_bytes_and_emits_manual_fields(self) -> None:
         repo_dir = self.make_repo()
         pack_path = self.write_pack(repo_dir, "demo.json", '{\n  "x": "a"\n}\n')
@@ -64,6 +100,7 @@ class SouthsidePublisherTests(unittest.TestCase):
             name="Demo Pack",
             author="Alice",
             summary="Notes",
+            pack_type="暴力",
             version=7,
             date="2026-05-30",
             southside_version="1.21.80",
@@ -82,9 +119,103 @@ class SouthsidePublisherTests(unittest.TestCase):
         self.assertEqual(pack["southsideVersion"], "1.21.80")
         self.assertEqual(pack["author"], "Alice")
         self.assertEqual(pack["summary"], "Notes")
+        self.assertEqual(pack["type"], "暴力")
         self.assertEqual(pack["sha256"], sp.sha256_bytes(before))
         self.assertIn("/packs/demo.json", pack["downloadUrl"])
         self.assertEqual(result.index_data["maxPackId"], 1)
+
+    def test_source_edit_changes_index_hash_without_touching_sidecar_fields(self) -> None:
+        repo_dir = self.make_repo()
+        self.write_pack(repo_dir, "demo.json", '{"x":"a"}\n')
+        meta = sp.publish_source_file(repo_dir, "packs/demo.json")
+        meta = sp.replace(
+            meta,
+            name="Demo",
+            author="Alice",
+            summary="Summary",
+            pack_type="安全",
+            version=3,
+            date="2026-05-30",
+            southside_version="1.21.80",
+        )
+        sp.write_pack_meta(repo_dir, meta)
+        first_result = sp.build_index_data("bedkillerspacex-boop/SouthsideConfigLoader", "master", sp.scan_repository_state(repo_dir))
+        first_pack = first_result.index_data["packs"][0]
+
+        sp.write_source_text(repo_dir, "packs/demo.json", '{"x":"b"}')
+
+        second_result = sp.build_index_data("bedkillerspacex-boop/SouthsideConfigLoader", "master", sp.scan_repository_state(repo_dir))
+        second_pack = second_result.index_data["packs"][0]
+
+        self.assertNotEqual(first_pack["sha256"], second_pack["sha256"])
+        self.assertEqual(second_pack["name"], "Demo")
+        self.assertEqual(second_pack["author"], "Alice")
+        self.assertEqual(second_pack["summary"], "Summary")
+        self.assertEqual(second_pack["type"], "安全")
+        self.assertEqual(second_pack["version"], 3)
+        self.assertEqual(second_pack["date"], "2026-05-30")
+        self.assertEqual(second_pack["southsideVersion"], "1.21.80")
+
+    def test_default_meta_uses_safe_type(self) -> None:
+        meta = sp.default_meta_for_source(1, "packs/demo.json")
+        self.assertEqual(meta.pack_type, "安全")
+
+    def test_load_sidecar_type_defaults_to_safe(self) -> None:
+        repo_dir = self.make_repo()
+        meta = sp.default_meta_for_source(1, "packs/demo.json")
+        sp.write_pack_meta(repo_dir, meta)
+
+        loaded = sp.load_sidecars(repo_dir)[1]
+
+        self.assertEqual(loaded.pack_type, "安全")
+
+    def test_rebuild_index_from_unpublished_source_publishes_and_increments_max_id(self) -> None:
+        repo_dir = self.make_repo()
+        (repo_dir / ".git").mkdir()
+        self.write_pack(repo_dir, "demo.json", '{"a":1}\n')
+
+        original_preferred_repo_dir = sp.preferred_repo_dir
+        try:
+            sp.preferred_repo_dir = lambda _owner_repo: repo_dir
+            with mock.patch.object(sp.messagebox, "showinfo", lambda *args, **kwargs: None), mock.patch.object(
+                sp.messagebox, "showerror", lambda *args, **kwargs: None
+            ):
+                app = sp.PublisherApp()
+                try:
+                    app.withdraw()
+                    app.owner_repo_var.set("temp/test")
+                    app.branch_var.set("master")
+                    app.load_state(repo_dir)
+                    app.focus_source_file("packs/demo.json")
+                    app.rebuild_index()
+                finally:
+                    app.destroy()
+        finally:
+            sp.preferred_repo_dir = original_preferred_repo_dir
+
+        registry = sp.load_registry(repo_dir)
+        index_data = sp.read_json(repo_dir / "index.json")
+        self.assertEqual(registry.max_pack_id, 1)
+        self.assertEqual(registry.bindings, {"packs/demo.json": 1})
+        self.assertEqual(index_data["maxPackId"], 1)
+        self.assertEqual(index_data["packs"][0]["id"], 1)
+        self.assertEqual(index_data["packs"][0]["downloadUrl"], "https://raw.githubusercontent.com/temp/test/master/packs/demo.json")
+
+    def test_unpublish_pack_deletes_binding_but_keeps_max_pack_id_monotonic(self) -> None:
+        repo_dir = self.make_repo()
+        self.write_pack(repo_dir, "one.json", '{"a":1}\n')
+        self.write_pack(repo_dir, "two.json", '{"b":2}\n')
+        sp.publish_source_file(repo_dir, "packs/one.json")
+        sp.publish_source_file(repo_dir, "packs/two.json")
+
+        sp.unpublish_pack(repo_dir, 2, delete_source=True)
+
+        registry = sp.load_registry(repo_dir)
+        state = sp.scan_repository_state(repo_dir)
+        self.assertEqual(registry.max_pack_id, 2)
+        self.assertEqual(registry.bindings, {"packs/one.json": 1})
+        self.assertFalse((repo_dir / "packs" / "two.json").exists())
+        self.assertEqual([record.meta.pack_id for record in state.published], [1])
 
     def test_scan_does_not_silently_rebind_renamed_files(self) -> None:
         repo_dir = self.make_repo()

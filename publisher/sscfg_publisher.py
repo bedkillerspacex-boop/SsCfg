@@ -13,7 +13,23 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from queue import Empty, Queue
-from tkinter import BOTH, END, LEFT, RIGHT, VERTICAL, W, BooleanVar, DoubleVar, PanedWindow, StringVar, Tk, filedialog, messagebox, ttk
+from tkinter import (
+    BOTH,
+    END,
+    LEFT,
+    RIGHT,
+    VERTICAL,
+    W,
+    BooleanVar,
+    DoubleVar,
+    PanedWindow,
+    StringVar,
+    Tk,
+    filedialog,
+    messagebox,
+    simpledialog,
+    ttk,
+)
 from tkinter.scrolledtext import ScrolledText
 from urllib.parse import quote
 
@@ -24,6 +40,9 @@ DEFAULT_REPO_CACHE_ROOT = SCRIPT_DIR / "repo_cache"
 DEFAULT_OWNER_REPO = "bedkillerspacex-boop/SsCfg"
 DEFAULT_BRANCH = "master"
 DEFAULT_COMMIT_MESSAGE = "update Southside publisher assets(windows)"
+PACK_TYPE_SAFE = "安全"
+PACK_TYPE_VIOLENT = "暴力"
+PACK_TYPE_OPTIONS = (PACK_TYPE_SAFE, PACK_TYPE_VIOLENT)
 PUSH_PROGRESS_RE = re.compile(
     r"(?P<stage>Enumerating objects|Counting objects|Compressing objects|Writing objects):\s*"
     r"(?P<percent>\d+)%\s*\((?P<done>\d+)/(?P<total>\d+)\)"
@@ -58,6 +77,7 @@ class PackMeta:
     name: str
     author: str
     summary: str
+    pack_type: str
     version: int
     date: str
     southside_version: str
@@ -113,6 +133,15 @@ def as_int(value: object, fallback: int) -> int:
         return int(value)
     except (TypeError, ValueError):
         return fallback
+
+
+def normalize_pack_type(value: object) -> str:
+    text = clean_string(value)
+    if not text:
+        return PACK_TYPE_SAFE
+    if text not in PACK_TYPE_OPTIONS:
+        raise PublishError(f"类型非法: {value!r}，只能是 {PACK_TYPE_SAFE} 或 {PACK_TYPE_VIOLENT}")
+    return text
 
 
 def read_json(path: Path) -> dict:
@@ -435,6 +464,54 @@ def source_file_from_path(repo_dir: Path, selected_path: Path) -> str:
     return normalize_source_file(relative.as_posix())
 
 
+def source_path_for_file(repo_dir: Path, source_file: str) -> Path:
+    normalized = normalize_source_file(source_file)
+    return repo_dir.joinpath(*normalized.split("/"))
+
+
+def source_pack_from_file(repo_dir: Path, source_file: str) -> SourcePack:
+    path = source_path_for_file(repo_dir, source_file)
+    if not path.exists():
+        raise PublishError(f"源文件不存在: {source_file}")
+    content = path.read_bytes()
+    return SourcePack(
+        path=path,
+        rel_path=normalize_source_file(source_file),
+        size_bytes=len(content),
+        sha256=sha256_bytes(content),
+    )
+
+
+def normalize_source_editor_text(text: str) -> str:
+    return text.replace("\r\n", "\n").rstrip("\n")
+
+
+def read_source_text(repo_dir: Path, source_file: str) -> str:
+    path = source_path_for_file(repo_dir, source_file)
+    if not path.exists():
+        return ""
+    return normalize_source_editor_text(path.read_text(encoding="utf-8-sig"))
+
+
+def validate_source_json_text(text: str, source_file: str) -> None:
+    normalized = normalize_source_editor_text(text)
+    if not normalized.strip():
+        raise PublishError(f"Source JSON cannot be empty: {source_file}")
+    try:
+        json.loads(normalized)
+    except json.JSONDecodeError as exc:
+        raise PublishError(f"Source JSON is invalid for {source_file}: {exc}") from exc
+
+
+def write_source_text(repo_dir: Path, source_file: str, text: str) -> Path:
+    path = source_path_for_file(repo_dir, source_file)
+    normalized = normalize_source_editor_text(text)
+    validate_source_json_text(normalized, source_file)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(normalized + "\n", encoding="utf-8")
+    return path
+
+
 def registry_path(repo_dir: Path) -> Path:
     return repo_dir / "publisher_meta" / "registry.json"
 
@@ -524,6 +601,7 @@ def load_sidecars(repo_dir: Path) -> dict[int, PackMeta]:
             name=clean_string(data.get("name")) or f"Pack {pack_id}",
             author=clean_string(data.get("author")),
             summary=clean_string(data.get("summary")),
+            pack_type=normalize_pack_type(data.get("type")),
             version=max(as_int(data.get("version"), 1), 1),
             date=clean_string(data.get("date")) or utc_now(),
             southside_version=clean_string(data.get("southsideVersion")),
@@ -540,6 +618,7 @@ def sidecar_payload(meta: PackMeta) -> dict:
         "name": clean_string(meta.name) or f"Pack {meta.pack_id}",
         "author": clean_string(meta.author),
         "summary": clean_string(meta.summary),
+        "type": normalize_pack_type(meta.pack_type),
         "version": max(meta.version, 1),
         "date": clean_string(meta.date) or utc_now(),
         "southsideVersion": clean_string(meta.southside_version),
@@ -575,6 +654,7 @@ def default_meta_for_source(pack_id: int, source_file: str) -> PackMeta:
         name=stem,
         author="",
         summary=stem,
+        pack_type=PACK_TYPE_SAFE,
         version=1,
         date=now,
         southside_version="",
@@ -637,6 +717,7 @@ def build_index_data(owner_repo: str, branch: str, state: ScanState) -> BuildRes
                 "name": meta["name"],
                 "author": meta["author"],
                 "summary": meta["summary"],
+                "type": meta["type"],
                 "version": meta["version"],
                 "date": meta["date"],
                 "southsideVersion": meta["southsideVersion"],
@@ -679,6 +760,49 @@ def publish_source_file(repo_dir: Path, source_file: str, meta_template: PackMet
     write_registry(repo_dir, state.registry)
     write_pack_meta(repo_dir, meta)
     return meta
+
+
+def create_source_file(repo_dir: Path, file_name: str, initial_text: str = "{}") -> SourcePack:
+    file_name = clean_string(file_name)
+    if not file_name:
+        raise PublishError("文件名不能为空")
+    if "/" in file_name or "\\" in file_name:
+        raise PublishError("新建 JSON 只能填写文件名，不能包含路径")
+    if not file_name.lower().endswith(".json"):
+        file_name = f"{file_name}.json"
+    source_file = normalize_source_file(f"packs/{file_name}")
+    path = source_path_for_file(repo_dir, source_file)
+    if path.exists():
+        raise PublishError(f"文件已存在: {source_file}")
+    write_source_text(repo_dir, source_file, initial_text)
+    return source_pack_from_file(repo_dir, source_file)
+
+
+def delete_source_file(repo_dir: Path, source_file: str) -> None:
+    path = source_path_for_file(repo_dir, source_file)
+    if not path.exists():
+        raise PublishError(f"源文件不存在: {source_file}")
+    path.unlink()
+
+
+def unpublish_pack(repo_dir: Path, pack_id: int, delete_source: bool = True) -> None:
+    state = scan_repository_state(repo_dir)
+    if pack_id <= 0:
+        raise PublishError("pack id 必须大于 0")
+    record = next((item for item in state.published if item.meta.pack_id == pack_id), None)
+    if record is None:
+        raise PublishError(f"未知的 pack id: {pack_id}")
+    source_file = record.meta.source_file
+    source_path = source_path_for_file(repo_dir, source_file)
+    if delete_source and source_path.exists():
+        source_path.unlink()
+    state.registry.bindings = {
+        bound_source: bound_id for bound_source, bound_id in state.registry.bindings.items() if bound_id != pack_id
+    }
+    sidecar = sidecar_path(repo_dir, pack_id)
+    if sidecar.exists():
+        sidecar.unlink()
+    write_registry(repo_dir, state.registry)
 
 
 def rebind_pack_source(repo_dir: Path, pack_id: int, new_source_file: str) -> PackMeta:
@@ -809,6 +933,7 @@ class PublisherApp(Tk):
         self.record_name_var = StringVar(value="")
         self.record_author_var = StringVar(value="")
         self.record_summary_var = StringVar(value="")
+        self.record_type_var = StringVar(value=PACK_TYPE_SAFE)
         self.record_version_var = StringVar(value="1")
         self.record_date_var = StringVar(value="")
         self.record_southside_version_var = StringVar(value="")
@@ -817,8 +942,12 @@ class PublisherApp(Tk):
         self.scan_state: ScanState | None = None
         self.current_item_key: str | None = None
         self.current_kind: str | None = None
-        self.loaded_snapshot: tuple[str, ...] | None = None
+        self.loaded_meta_snapshot: tuple[str, ...] | None = None
+        self.loaded_source_snapshot: str | None = None
+        self.metadata_dirty = False
+        self.source_dirty = False
         self.form_dirty = False
+        self.suspend_dirty_tracking = False
         self.busy = False
         self.worker_queue: Queue[tuple[str, object]] = Queue()
         self.pending_sync_reload = False
@@ -868,8 +997,11 @@ class PublisherApp(Tk):
         action_bar.pack(fill="x", pady=(4, 10))
         self.action_buttons = [
             ttk.Button(action_bar, text="扫描仓库", command=self.scan_repository),
+            ttk.Button(action_bar, text="新建 JSON", command=self.create_new_json),
             ttk.Button(action_bar, text="选择已有 JSON", command=self.choose_existing_json),
+            ttk.Button(action_bar, text="删除当前项", command=self.delete_current_item),
             ttk.Button(action_bar, text="发布当前项", command=self.publish_selected_source),
+            ttk.Button(action_bar, text="保存源 JSON", command=self.save_current_source_json),
             ttk.Button(action_bar, text="保存元数据", command=self.save_current_metadata),
             ttk.Button(action_bar, text="刷新日期", command=self.refresh_current_date),
             ttk.Button(action_bar, text="重新绑定", command=self.rebind_current_record),
@@ -928,15 +1060,22 @@ class PublisherApp(Tk):
         ttk.Entry(editor, textvariable=self.record_author_var).grid(row=4, column=1, sticky="ew", pady=4)
         ttk.Label(editor, text="简介").grid(row=5, column=0, sticky=W, pady=4)
         ttk.Entry(editor, textvariable=self.record_summary_var).grid(row=5, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="版本").grid(row=6, column=0, sticky=W, pady=4)
-        ttk.Entry(editor, textvariable=self.record_version_var).grid(row=6, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="日期").grid(row=7, column=0, sticky=W, pady=4)
-        ttk.Entry(editor, textvariable=self.record_date_var).grid(row=7, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="Southside 版本").grid(row=8, column=0, sticky=W, pady=4)
-        ttk.Entry(editor, textvariable=self.record_southside_version_var).grid(row=8, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="重新绑定目标").grid(row=9, column=0, sticky=W, pady=4)
+        ttk.Label(editor, text="类型").grid(row=6, column=0, sticky=W, pady=4)
+        ttk.Combobox(editor, textvariable=self.record_type_var, state="readonly", values=PACK_TYPE_OPTIONS).grid(row=6, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="版本").grid(row=7, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_version_var).grid(row=7, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="日期").grid(row=8, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_date_var).grid(row=8, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="Southside 版本").grid(row=9, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_southside_version_var).grid(row=9, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="重新绑定目标").grid(row=10, column=0, sticky=W, pady=4)
         self.rebind_combo = ttk.Combobox(editor, textvariable=self.rebind_source_var, state="readonly")
-        self.rebind_combo.grid(row=9, column=1, sticky="ew", pady=4)
+        self.rebind_combo.grid(row=10, column=1, sticky="ew", pady=4)
+
+        source_editor = ttk.LabelFrame(right, text="源 JSON", padding=12)
+        source_editor.pack(fill=BOTH, expand=True, pady=(10, 0))
+        self.source_text = ScrolledText(source_editor, wrap="none", font=("Consolas", 10), height=18)
+        self.source_text.pack(fill=BOTH, expand=True)
 
         ttk.Label(right, text="日志").pack(anchor=W, pady=(10, 4))
         self.log_box = ScrolledText(right, wrap="word", font=("Consolas", 10), height=18)
@@ -947,13 +1086,25 @@ class PublisherApp(Tk):
             self.record_name_var,
             self.record_author_var,
             self.record_summary_var,
+            self.record_type_var,
             self.record_version_var,
             self.record_date_var,
             self.record_southside_version_var,
         ]:
             variable.trace_add("write", self._on_form_changed)
+        self.source_text.bind("<<Modified>>", self._on_source_text_modified)
 
     def _on_form_changed(self, *_args) -> None:
+        if self.suspend_dirty_tracking:
+            return
+        self.refresh_dirty_state()
+
+    def _on_source_text_modified(self, _event=None) -> None:
+        if not self.source_text.edit_modified():
+            return
+        self.source_text.edit_modified(False)
+        if self.suspend_dirty_tracking:
+            return
         self.refresh_dirty_state()
 
     def refresh_github_status(self) -> None:
@@ -990,8 +1141,15 @@ class PublisherApp(Tk):
         self.log_box.delete("1.0", END)
 
     def refresh_dirty_state(self) -> None:
-        snapshot = self.current_form_snapshot()
-        self.form_dirty = self.loaded_snapshot is not None and snapshot is not None and snapshot != self.loaded_snapshot
+        meta_snapshot = self.current_form_snapshot()
+        source_snapshot = self.current_source_snapshot()
+        self.metadata_dirty = (
+            self.loaded_meta_snapshot is not None and meta_snapshot is not None and meta_snapshot != self.loaded_meta_snapshot
+        )
+        self.source_dirty = (
+            self.loaded_source_snapshot is not None and source_snapshot is not None and source_snapshot != self.loaded_source_snapshot
+        )
+        self.form_dirty = self.metadata_dirty or self.source_dirty
         base = self.summary_var.get()
         if base.startswith("[Unsaved] "):
             base = base[len("[Unsaved] ") :]
@@ -1004,11 +1162,57 @@ class PublisherApp(Tk):
             self.record_name_var.get().strip(),
             self.record_author_var.get().strip(),
             self.record_summary_var.get().strip(),
+            self.record_type_var.get().strip(),
             self.record_version_var.get().strip(),
             self.record_date_var.get().strip(),
             self.record_southside_version_var.get().strip(),
             self.record_source_file_var.get().strip(),
         )
+
+    def current_metadata_editor_values(self) -> tuple[str, ...] | None:
+        if self.current_kind is None:
+            return None
+        return (
+            self.record_name_var.get(),
+            self.record_author_var.get(),
+            self.record_summary_var.get(),
+            self.record_type_var.get(),
+            self.record_version_var.get(),
+            self.record_date_var.get(),
+            self.record_southside_version_var.get(),
+        )
+
+    def apply_metadata_editor_values(self, values: tuple[str, ...]) -> None:
+        self.suspend_dirty_tracking = True
+        try:
+            (
+                name,
+                author,
+                summary,
+                pack_type,
+                version,
+                date,
+                southside_version,
+            ) = values
+            self.record_name_var.set(name)
+            self.record_author_var.set(author)
+            self.record_summary_var.set(summary)
+            self.record_type_var.set(pack_type)
+            self.record_version_var.set(version)
+            self.record_date_var.set(date)
+            self.record_southside_version_var.set(southside_version)
+        finally:
+            self.suspend_dirty_tracking = False
+
+    def current_source_snapshot(self) -> str | None:
+        if self.current_kind is None:
+            return None
+        return normalize_source_editor_text(self.source_text.get("1.0", "end-1c"))
+
+    def set_source_editor_text(self, text: str) -> None:
+        self.source_text.delete("1.0", END)
+        self.source_text.insert("1.0", normalize_source_editor_text(text))
+        self.source_text.edit_modified(False)
 
     def confirm_unsaved_changes(self, action_text: str) -> bool:
         if not self.form_dirty:
@@ -1016,24 +1220,35 @@ class PublisherApp(Tk):
         if self.current_kind == "published":
             choice = messagebox.askyesnocancel(
                 "Southside 发布器",
-                f"当前元数据有未保存修改，{action_text} 前要先保存吗？",
+                f"当前记录有未保存修改，{action_text} 前要先保存吗？",
                 parent=self,
             )
             if choice is None:
                 return False
             if choice:
-                self.save_current_metadata(show_message=False)
+                self.save_current_changes(show_message=False)
             return True
         if self.current_kind == "unpublished":
+            if self.metadata_dirty:
+                choice = messagebox.askyesnocancel(
+                    "Southside 发布器",
+                    f"当前未发布草稿有修改，{action_text} 前要先发布吗？",
+                    parent=self,
+                )
+                if choice is None:
+                    return False
+                if choice:
+                    self.publish_selected_source(show_message=False)
+                return True
             choice = messagebox.askyesnocancel(
                 "Southside 发布器",
-                f"当前未发布草稿有修改，{action_text} 前要先发布吗？",
+                f"当前源 JSON 有未保存修改，{action_text} 前要先保存吗？",
                 parent=self,
             )
             if choice is None:
                 return False
             if choice:
-                self.publish_selected_source(show_message=False)
+                self.save_current_source_json(show_message=False)
             return True
         return True
 
@@ -1129,6 +1344,7 @@ class PublisherApp(Tk):
             name=self.record_name_var.get().strip() or Path(source_file).stem,
             author=self.record_author_var.get().strip(),
             summary=self.record_summary_var.get().strip() or Path(source_file).stem,
+            pack_type=normalize_pack_type(self.record_type_var.get().strip()),
             version=version,
             date=date,
             southside_version=self.record_southside_version_var.get().strip(),
@@ -1143,11 +1359,10 @@ class PublisherApp(Tk):
         self.record_name_var.set(meta.name)
         self.record_author_var.set(meta.author)
         self.record_summary_var.set(meta.summary)
+        self.record_type_var.set(meta.pack_type)
         self.record_version_var.set(str(meta.version))
         self.record_date_var.set(meta.date)
         self.record_southside_version_var.set(meta.southside_version)
-        self.loaded_snapshot = self.current_form_snapshot()
-        self.form_dirty = False
 
     def update_rebind_choices(self) -> None:
         if self.scan_state is None:
@@ -1165,38 +1380,56 @@ class PublisherApp(Tk):
     def load_form(self, item_key: str | None) -> None:
         self.current_item_key = item_key
         self.current_kind = None
-        if item_key is None or self.scan_state is None:
-            self.record_status_var.set("")
-            self.record_id_var.set("")
-            self.record_source_file_var.set("")
-            self.record_name_var.set("")
-            self.record_author_var.set("")
-            self.record_summary_var.set("")
-            self.record_version_var.set("1")
-            self.record_date_var.set("")
-            self.record_southside_version_var.set("")
-            self.loaded_snapshot = None
+        self.suspend_dirty_tracking = True
+        try:
+            if item_key is None or self.scan_state is None:
+                self.record_status_var.set("")
+                self.record_id_var.set("")
+                self.record_source_file_var.set("")
+                self.record_name_var.set("")
+                self.record_author_var.set("")
+                self.record_summary_var.set("")
+                self.record_type_var.set(PACK_TYPE_SAFE)
+                self.record_version_var.set("1")
+                self.record_date_var.set("")
+                self.record_southside_version_var.set("")
+                self.set_source_editor_text("")
+                self.loaded_meta_snapshot = None
+                self.loaded_source_snapshot = None
+                self.metadata_dirty = False
+                self.source_dirty = False
+                self.form_dirty = False
+                self.update_rebind_choices()
+                return
+            if item_key.startswith("pub:"):
+                pack_id = as_int(item_key.split(":", 1)[1], 0)
+                record = next((item for item in self.scan_state.published if item.meta.pack_id == pack_id), None)
+                if record is None:
+                    self.load_form(None)
+                    return
+                self.current_kind = "published"
+                self.populate_form_from_meta(record.meta, record.status, str(record.meta.pack_id))
+            elif item_key.startswith("src:"):
+                source_file = item_key.split(":", 1)[1]
+                source = next((item for item in self.scan_state.unpublished if item.rel_path == source_file), None)
+                if source is None:
+                    self.load_form(None)
+                    return
+                self.current_kind = "unpublished"
+                draft = default_meta_for_source(0, source.rel_path)
+                draft = replace(draft, date=utc_now())
+                self.populate_form_from_meta(draft, "未发布", f"下一个: {self.scan_state.registry.max_pack_id + 1}")
+            source_text = read_source_text(self.scan_state.repo_dir, self.record_source_file_var.get().strip()) if self.current_kind else ""
+            self.set_source_editor_text(source_text)
+            self.loaded_meta_snapshot = self.current_form_snapshot()
+            self.loaded_source_snapshot = self.current_source_snapshot()
+            self.metadata_dirty = False
+            self.source_dirty = False
+            self.form_dirty = False
             self.update_rebind_choices()
-            return
-        if item_key.startswith("pub:"):
-            pack_id = as_int(item_key.split(":", 1)[1], 0)
-            record = next((item for item in self.scan_state.published if item.meta.pack_id == pack_id), None)
-            if record is None:
-                self.load_form(None)
-                return
-            self.current_kind = "published"
-            self.populate_form_from_meta(record.meta, record.status, str(record.meta.pack_id))
-        elif item_key.startswith("src:"):
-            source_file = item_key.split(":", 1)[1]
-            source = next((item for item in self.scan_state.unpublished if item.rel_path == source_file), None)
-            if source is None:
-                self.load_form(None)
-                return
-            self.current_kind = "unpublished"
-            draft = default_meta_for_source(0, source.rel_path)
-            draft = replace(draft, date=utc_now())
-            self.populate_form_from_meta(draft, "未发布", f"下一个: {self.scan_state.registry.max_pack_id + 1}")
-        self.update_rebind_choices()
+        finally:
+            self.suspend_dirty_tracking = False
+        self.refresh_dirty_state()
 
     def on_tree_select(self, _event=None) -> None:
         if self.busy:
@@ -1238,6 +1471,71 @@ class PublisherApp(Tk):
         except Exception as exc:
             messagebox.showerror("Southside 发布器", str(exc))
 
+    def create_new_json(self) -> None:
+        if self.busy:
+            return
+        try:
+            if self.current_item_key and self.form_dirty and not self.confirm_unsaved_changes("新建 JSON"):
+                return
+            repo_dir, _, _ = self.resolve_inputs()
+            repo_dir = ensure_repo_dir(str(repo_dir))
+            file_name = simpledialog.askstring("新建 JSON", "输入新的 JSON 文件名", parent=self)
+            if file_name is None:
+                return
+            source = create_source_file(repo_dir, file_name, "{}")
+            self.load_state(repo_dir)
+            self.focus_source_file(source.rel_path)
+            self.log(f"已新建 {source.rel_path}")
+            messagebox.showinfo("Southside 发布器", f"已新建 {source.rel_path}")
+        except Exception as exc:
+            messagebox.showerror("Southside 发布器", str(exc))
+
+    def delete_current_item(self) -> None:
+        if self.busy:
+            return
+        try:
+            if self.current_kind is None:
+                raise PublishError("请先选择一个包")
+            if self.form_dirty:
+                should_continue = messagebox.askyesno(
+                    "Southside 发布器",
+                    "当前有未保存修改，删除会直接丢弃这些修改，继续吗？",
+                    parent=self,
+                )
+                if not should_continue:
+                    return
+            repo_dir, _, _ = self.resolve_inputs()
+            repo_dir = ensure_repo_dir(str(repo_dir))
+            if self.current_kind == "published":
+                pack_id = self.current_published_id()
+                source_file = self.current_source_file()
+                should_delete = messagebox.askyesno(
+                    "Southside 发布器",
+                    f"删除已发布包后会移除绑定和元数据，并删除源文件 {source_file}。继续吗？",
+                    parent=self,
+                )
+                if not should_delete:
+                    return
+                unpublish_pack(repo_dir, pack_id, delete_source=True)
+                self.load_state(repo_dir)
+                self.log(f"已删除已发布包 id {pack_id}: {source_file}")
+                messagebox.showinfo("Southside 发布器", f"已删除已发布包 id {pack_id}")
+                return
+            source_file = self.current_source_file()
+            should_delete = messagebox.askyesno(
+                "Southside 发布器",
+                f"确认删除未发布源文件 {source_file} 吗？",
+                parent=self,
+            )
+            if not should_delete:
+                return
+            delete_source_file(repo_dir, source_file)
+            self.load_state(repo_dir)
+            self.log(f"已删除未发布源文件 {source_file}")
+            messagebox.showinfo("Southside 发布器", f"已删除 {source_file}")
+        except Exception as exc:
+            messagebox.showerror("Southside 发布器", str(exc))
+
     def refresh_current_date(self) -> None:
         self.record_date_var.set(utc_now())
 
@@ -1253,6 +1551,102 @@ class PublisherApp(Tk):
         source_file = self.record_source_file_var.get().strip()
         return normalize_source_file(source_file)
 
+    def persist_current_source_json(self, repo_dir: Path) -> Path:
+        source_file = self.current_source_file()
+        source_text = self.current_source_snapshot()
+        if source_text is None:
+            raise PublishError("当前没有可保存的源 JSON")
+        return write_source_text(repo_dir, source_file, source_text)
+
+    def persist_current_metadata(self, repo_dir: Path) -> PackMeta:
+        if self.current_kind != "published":
+            raise PublishError("请先选择一个已发布的包")
+        pack_id = self.current_published_id()
+        source_file = self.current_source_file()
+        meta = self.build_form_meta(pack_id, source_file)
+        existing = next(
+            (record.meta for record in (self.scan_state.published if self.scan_state else []) if record.meta.pack_id == pack_id),
+            None,
+        )
+        if existing is not None:
+            meta = replace(meta, created_at=existing.created_at)
+        if self.auto_refresh_date_var.get():
+            meta = replace(meta, date=utc_now())
+        save_metadata(repo_dir, meta)
+        return meta
+
+    def save_current_source_json(self, show_message: bool = True) -> None:
+        if self.busy:
+            return
+        try:
+            if self.current_kind is None:
+                raise PublishError("请先选择一个包")
+            repo_dir, _, _ = self.resolve_inputs()
+            repo_dir = ensure_repo_dir(str(repo_dir))
+            draft_values = self.current_metadata_editor_values()
+            should_preserve_metadata = bool(self.metadata_dirty and draft_values is not None)
+            source_file = self.current_source_file()
+            path = self.persist_current_source_json(repo_dir)
+            self.load_state(repo_dir)
+            self.focus_source_file(source_file)
+            if should_preserve_metadata and draft_values is not None:
+                loaded_meta_snapshot = self.loaded_meta_snapshot
+                self.apply_metadata_editor_values(draft_values)
+                self.loaded_meta_snapshot = loaded_meta_snapshot
+                self.loaded_source_snapshot = self.current_source_snapshot()
+                self.refresh_dirty_state()
+            self.log(f"已保存源 JSON: {path}")
+            if show_message:
+                messagebox.showinfo("Southside 发布器", "源 JSON 已保存")
+        except Exception as exc:
+            messagebox.showerror("Southside 发布器", str(exc))
+
+    def save_current_changes(self, show_message: bool = True) -> None:
+        if self.busy:
+            return
+        try:
+            if self.current_kind != "published":
+                raise PublishError("当前记录不能直接保存全部修改")
+            repo_dir, _, _ = self.resolve_inputs()
+            repo_dir = ensure_repo_dir(str(repo_dir))
+            source_file = self.current_source_file()
+            changed_parts: list[str] = []
+            if self.source_dirty:
+                self.persist_current_source_json(repo_dir)
+                changed_parts.append("源 JSON")
+            if self.metadata_dirty:
+                self.persist_current_metadata(repo_dir)
+                changed_parts.append("元数据")
+            if not changed_parts:
+                return
+            self.load_state(repo_dir)
+            self.focus_source_file(source_file)
+            self.log(f"已保存 {', '.join(changed_parts)}")
+            if show_message:
+                messagebox.showinfo("Southside 发布器", f"已保存 {', '.join(changed_parts)}")
+        except Exception as exc:
+            messagebox.showerror("Southside 发布器", str(exc))
+
+    def persist_current_record_for_index(self, repo_dir: Path, publish_unpublished: bool) -> tuple[str | None, bool]:
+        if self.current_kind is None:
+            return None, False
+        current_source = self.current_source_file()
+        changed = False
+        if self.source_dirty:
+            self.persist_current_source_json(repo_dir)
+            changed = True
+        if self.current_kind == "published":
+            if self.metadata_dirty:
+                self.persist_current_metadata(repo_dir)
+                changed = True
+            return current_source, changed
+        if publish_unpublished:
+            meta = self.build_form_meta(None, current_source)
+            publish_source_file(repo_dir, meta.source_file, meta)
+            self.log(f"已发布 {meta.source_file}")
+            changed = True
+        return current_source, changed
+
     def publish_selected_source(self, show_message: bool = True) -> None:
         if self.busy:
             return
@@ -1261,9 +1655,11 @@ class PublisherApp(Tk):
                 raise PublishError("请先选择一个未发布的源文件")
             repo_dir, _, _ = self.resolve_inputs()
             repo_dir = ensure_repo_dir(str(repo_dir))
+            self.persist_current_source_json(repo_dir)
             meta = self.build_form_meta(None, self.current_source_file())
             publish_source_file(repo_dir, meta.source_file, meta)
             self.load_state(repo_dir)
+            self.focus_source_file(meta.source_file)
             self.log(f"已发布 {meta.source_file}")
             if show_message:
                 messagebox.showinfo("Southside 发布器", "已发布新的包元数据")
@@ -1278,20 +1674,10 @@ class PublisherApp(Tk):
                 raise PublishError("请先选择一个已发布的包")
             repo_dir, _, _ = self.resolve_inputs()
             repo_dir = ensure_repo_dir(str(repo_dir))
-            pack_id = self.current_published_id()
-            source_file = self.current_source_file()
-            meta = self.build_form_meta(pack_id, source_file)
-            existing = next(
-                (record.meta for record in (self.scan_state.published if self.scan_state else []) if record.meta.pack_id == pack_id),
-                None,
-            )
-            if existing is not None:
-                meta = replace(meta, created_at=existing.created_at)
-            if self.auto_refresh_date_var.get():
-                meta = replace(meta, date=utc_now())
-            save_metadata(repo_dir, meta)
+            meta = self.persist_current_metadata(repo_dir)
             self.load_state(repo_dir)
-            self.log(f"已保存 id {pack_id} 的元数据")
+            self.focus_source_file(meta.source_file)
+            self.log(f"已保存 id {meta.pack_id} 的元数据")
             if show_message:
                 messagebox.showinfo("Southside 发布器", "元数据已保存")
         except Exception as exc:
@@ -1323,8 +1709,14 @@ class PublisherApp(Tk):
         try:
             repo_dir, owner_repo, branch = self.resolve_inputs()
             repo_dir = ensure_repo_dir(str(repo_dir))
+            current_source, persisted = self.persist_current_record_for_index(repo_dir, publish_unpublished=False)
             state = scan_repository_state(repo_dir)
             result = build_index_data(owner_repo, branch, state)
+            if current_source is not None and persisted:
+                self.load_state(repo_dir)
+                self.focus_source_file(current_source)
+            elif self.current_kind == "unpublished":
+                self.log("[warn] 当前 JSON 还未发布，预览不会分配 ID，也不会出现在 index.json 中")
             self.summary_var.set(build_summary(result))
             for line in preview_lines(result):
                 self.log(line)
@@ -1338,12 +1730,13 @@ class PublisherApp(Tk):
         try:
             repo_dir, owner_repo, branch = self.resolve_inputs()
             repo_dir = ensure_repo_dir(str(repo_dir))
-            if self.current_kind == "published" and self.form_dirty:
-                self.save_current_metadata(show_message=False)
+            current_source, _ = self.persist_current_record_for_index(repo_dir, publish_unpublished=True)
             state = scan_repository_state(repo_dir)
             result = build_index_data(owner_repo, branch, state)
             path = write_index_file(repo_dir, result)
             self.load_state(repo_dir)
+            if current_source is not None:
+                self.focus_source_file(current_source)
             self.summary_var.set(build_summary(result))
             self.log(build_summary(result))
             self.log(f"已写入 {path}")
@@ -1464,12 +1857,13 @@ class PublisherApp(Tk):
         try:
             repo_dir, owner_repo, branch = self.resolve_inputs()
             repo_dir = ensure_repo_dir(str(repo_dir))
-            if self.current_kind == "published" and self.form_dirty:
-                self.save_current_metadata(show_message=False)
+            current_source, _ = self.persist_current_record_for_index(repo_dir, publish_unpublished=True)
             state = scan_repository_state(repo_dir)
             result = build_index_data(owner_repo, branch, state)
             path = write_index_file(repo_dir, result)
             self.load_state(repo_dir)
+            if current_source is not None:
+                self.focus_source_file(current_source)
             self.summary_var.set(build_summary(result))
             self.log(build_summary(result))
             self.log(f"已写入 {path}")
