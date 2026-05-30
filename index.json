@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-30T09:37:25Z",
+  "generatedAt": "2026-05-30T09:38:04Z",
   "maxPackId": 1,
   "packs": [
     {
       "id": 1,
-      "name": "demo",
+      "name": "test",
       "author": "",
       "summary": "demo",
       "version": 1,
