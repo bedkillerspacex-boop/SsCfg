@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-30T09:38:04Z",
+  "generatedAt": "2026-05-30T13:00:40Z",
   "maxPackId": 1,
   "packs": [
     {
@@ -8,6 +8,7 @@
       "name": "test",
       "author": "",
       "summary": "demo",
+      "type": "安全",
       "version": 1,
       "date": "2026-05-30T09:33:34Z",
       "southsideVersion": "",
