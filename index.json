@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-30T08:51:26Z",
+  "maxPackId": 1,
+  "packs": [
+    {
+      "id": 1,
+      "name": "demo",
+      "author": "bedkillerspacex-boop",
+      "summary": "first demo pack",
+      "version": 1,
+      "date": "2026-05-30",
+      "southsideVersion": "1.0.0",
+      "sha256": "a81cbce9cb702c883672c83af2fa05bd0fb8e6bbb9e68db3d239aafeec1fc15b",
+      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/master/packs/demo.json",
+      "fileName": "demo.json",
+      "sizeBytes": 61
+    }
+  ]
+}

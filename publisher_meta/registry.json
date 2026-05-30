@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "maxPackId": 1,
+  "bindings": {
+    "packs/demo.json": 1
+  }
+}
+
