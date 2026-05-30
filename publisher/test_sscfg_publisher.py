@@ -72,6 +72,17 @@ class SouthsidePublisherTests(unittest.TestCase):
 
         self.assertEqual(path.read_text(encoding="utf-8"), before)
 
+    def test_collect_source_packs_hashes_published_lf_bytes(self) -> None:
+        repo_dir = self.make_repo()
+        path = repo_dir / "packs" / "demo.json"
+        path.write_bytes(b'{\r\n  "a": 1\r\n}\r\n')
+
+        source = sp.collect_source_packs(repo_dir)[0]
+        expected = b'{\n  "a": 1\n}\n'
+
+        self.assertEqual(source.size_bytes, len(expected))
+        self.assertEqual(source.sha256, sp.sha256_bytes(expected))
+
     def test_create_source_file_creates_json_under_packs(self) -> None:
         repo_dir = self.make_repo()
 
@@ -93,6 +104,7 @@ class SouthsidePublisherTests(unittest.TestCase):
         repo_dir = self.make_repo()
         pack_path = self.write_pack(repo_dir, "demo.json", '{\n  "x": "a"\n}\n')
         before = pack_path.read_bytes()
+        published_before = sp.published_source_bytes(before)
 
         meta = sp.publish_source_file(repo_dir, "packs/demo.json")
         meta = sp.replace(
@@ -120,7 +132,7 @@ class SouthsidePublisherTests(unittest.TestCase):
         self.assertEqual(pack["author"], "Alice")
         self.assertEqual(pack["summary"], "Notes")
         self.assertEqual(pack["type"], "暴力")
-        self.assertEqual(pack["sha256"], sp.sha256_bytes(before))
+        self.assertEqual(pack["sha256"], sp.sha256_bytes(published_before))
         self.assertIn("/packs/demo.json", pack["downloadUrl"])
         self.assertEqual(result.index_data["maxPackId"], 1)
 

@@ -160,6 +160,10 @@ def sha256_bytes(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
+def published_source_bytes(content: bytes) -> bytes:
+    return content.replace(b"\r\n", b"\n")
+
+
 def normalize_owner_repo(value: str) -> str:
     text = clean_string(value)
     if not text:
@@ -534,7 +538,7 @@ def collect_source_packs(repo_dir: Path) -> list[SourcePack]:
         raise PublishError(f"缺少 packs 目录: {packs_dir}")
     results: list[SourcePack] = []
     for path in sorted(packs_dir.glob("*.json"), key=lambda item: item.name.lower()):
-        content = path.read_bytes()
+        content = published_source_bytes(path.read_bytes())
         results.append(
             SourcePack(
                 path=path,
