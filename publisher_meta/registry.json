@@ -1,7 +1,8 @@
 {
   "schemaVersion": 1,
-  "maxPackId": 1,
+  "maxPackId": 2,
   "bindings": {
+    "packs/BSKCFG.json": 2,
     "packs/demo.json": 1
   }
 }
