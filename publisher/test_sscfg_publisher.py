@@ -211,7 +211,10 @@ class SouthsidePublisherTests(unittest.TestCase):
         self.assertEqual(registry.bindings, {"packs/demo.json": 1})
         self.assertEqual(index_data["maxPackId"], 1)
         self.assertEqual(index_data["packs"][0]["id"], 1)
-        self.assertEqual(index_data["packs"][0]["downloadUrl"], "https://raw.githubusercontent.com/temp/test/master/packs/demo.json")
+        self.assertEqual(
+            index_data["packs"][0]["downloadUrl"],
+            "https://github.com/temp/test/raw/refs/heads/master/packs/demo.json",
+        )
 
     def test_unpublish_pack_deletes_binding_but_keeps_max_pack_id_monotonic(self) -> None:
         repo_dir = self.make_repo()

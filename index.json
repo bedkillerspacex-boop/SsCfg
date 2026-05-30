@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-30T15:05:38Z",
+  "generatedAt": "2026-05-30T15:13:09Z",
   "maxPackId": 2,
   "packs": [
     {
@@ -13,7 +13,7 @@
       "date": "2026-05-30T09:33:34Z",
       "southsideVersion": "",
       "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
-      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/master/packs/demo.json",
+      "downloadUrl": "https://github.com/bedkillerspacex-boop/SsCfg/raw/refs/heads/master/packs/demo.json",
       "fileName": "demo.json",
       "sizeBytes": 2
     },
@@ -27,7 +27,7 @@
       "date": "2026-05-30T14:58:34Z",
       "southsideVersion": "",
       "sha256": "9af519a29110848550a1101f276f05ba6c9ad483a04540f20d7e70a0c383b7f1",
-      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/master/packs/BSKCFG.json",
+      "downloadUrl": "https://github.com/bedkillerspacex-boop/SsCfg/raw/refs/heads/master/packs/BSKCFG.json",
       "fileName": "BSKCFG.json",
       "sizeBytes": 31293
     }

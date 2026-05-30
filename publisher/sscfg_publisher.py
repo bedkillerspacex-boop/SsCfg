@@ -529,7 +529,10 @@ def sidecar_path(repo_dir: Path, pack_id: int) -> Path:
 
 
 def raw_download_url(owner_repo: str, branch: str, source_file: str) -> str:
-    return f"https://raw.githubusercontent.com/{normalize_owner_repo(owner_repo)}/{clean_string(branch) or DEFAULT_BRANCH}/{quote(source_file, safe='/')}"
+    return (
+        f"https://github.com/{normalize_owner_repo(owner_repo)}/raw/refs/heads/"
+        f"{quote(clean_string(branch) or DEFAULT_BRANCH, safe='')}/{quote(source_file, safe='/')}"
+    )
 
 
 def collect_source_packs(repo_dir: Path) -> list[SourcePack]:
