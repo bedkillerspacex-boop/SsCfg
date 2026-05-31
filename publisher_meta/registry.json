@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
-  "maxPackId": 4,
+  "maxPackId": 5,
   "bindings": {
     "packs/BSKCFG.json": 2,
     "packs/Float-cfg.json": 4,
-    "packs/Ryorin的空岛_清洁视觉.json": 3
+    "packs/Ryorin的空岛_清洁视觉.json": 3,
+    "packs/config.json": 5
   }
 }

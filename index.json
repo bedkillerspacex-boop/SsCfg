@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-31T02:25:13Z",
-  "maxPackId": 4,
+  "generatedAt": "2026-05-31T08:03:11Z",
+  "maxPackId": 5,
   "packs": [
     {
       "id": 2,
@@ -44,6 +44,20 @@
       "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/Float-cfg.json",
       "fileName": "Float-cfg.json",
       "sizeBytes": 31250
+    },
+    {
+      "id": 5,
+      "name": "NewWzy  config",
+      "author": "NewWzy",
+      "summary": "NewWzy config",
+      "type": "安全",
+      "version": 1,
+      "date": "2026-05-31T08:03:08Z",
+      "southsideVersion": "",
+      "sha256": "0a9c786b12dfbf46d37eef56f82290439ebb03d6a55ed16da4e86ec7f12a4380",
+      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/config.json",
+      "fileName": "config.json",
+      "sizeBytes": 31319
     }
   ]
 }

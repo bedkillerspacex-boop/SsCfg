@@ -1,0 +1,1872 @@
+{
+  "ArrayList": {
+    "ArrayList": {
+      "Style": 0,
+      "No Render Modules": true,
+      "Only Bound Modules": true,
+      "Remove Shadow": false,
+      "Show Suffix": true,
+      "Background": false,
+      "Round Background": false,
+      "Font": 2,
+      "Color": 3,
+      "Custom Color A": {
+        "hsba": [
+          196,
+          0,
+          72,
+          255
+        ],
+        "dataBit": -1
+      },
+      "Custom Color B": {
+        "hsba": [
+          194,
+          80,
+          100,
+          211
+        ],
+        "dataBit": -1
+      },
+      "Custom Speed": 10.0,
+      "Locked": false,
+      "HUD Position": {
+        "anchor": "2",
+        "x": -1.9073486E-5,
+        "y": 0.0
+      },
+      "Scale": 1.6,
+      "Show in Chat": true,
+      "Show in F3 (Debug)": false,
+      "Show in GUIs": true
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "ClientSettings": {
+    "MainMenu Style": 1,
+    "Sound Style": 3,
+    "Volume": 1,
+    "GPT Prompt": 0,
+    "Custom Prompt": "",
+    "ProgressBar Style": 0,
+    "ProgressBar Y Offset": 20,
+    "Enable IRC Chat": true,
+    "IRC FastChat": true,
+    "IRCChat Prefix": "!",
+    "IRC Allow PVP": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Notification": {
+    "Keep Time": 2.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Watermark": {
+    "Style": 0,
+    "Watermark": {
+      "Subtitle Content": 0,
+      "Background Glow": true,
+      "Locked": false,
+      "HUD Position": {
+        "anchor": "0",
+        "x": 8.382343,
+        "y": 7.2000003
+      },
+      "Scale": 1.0,
+      "Show in Chat": true,
+      "Show in F3 (Debug)": false,
+      "Show in GUIs": true
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "Targets": {
+    "Players": true,
+    "Mobs": false,
+    "Animals": false,
+    "Villagers": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Renders": {
+    "MSAA": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "TabGUI": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Account": {
+    "debug": false,
+    "AutoGetWhenDisconnected": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "SuperKnockBack": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "KB Controller": {
+    "Horizontal Angle": 0.0,
+    "Only KB Enchant": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoKnockBack": {
+    "Min Range": 3.1,
+    "Max Range": 16.0,
+    "Delay": 350.0,
+    "AutoSwitch(OnlyMainHand)": true,
+    "No Special Items": true,
+    "Prediction": true,
+    "Predict Ticks": 4,
+    "Wall Check": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "BowAimAssist": {
+    "Fov": 180,
+    "Range": 100,
+    "Priority": 0,
+    "AutoRelease": false,
+    "RotationShot": true,
+    "Prediction": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "BowSpammer": {
+    "Min Range": 10,
+    "Max Range": 50,
+    "Predict Movement": true,
+    "Fov": 360,
+    "Priority": 0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AntiFireball": {
+    "Anti Velocity": true,
+    "Ignore Self": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoClicker": {
+    "Left Click": true,
+    "Min Left CPS": 8.0,
+    "Max Left CPS": 10.0,
+    "Stop While Break": true,
+    "Right Click": false,
+    "Min Right CPS": 8.0,
+    "Max Right CPS": 10.0,
+    "Only Blocks": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoCrystal": {
+    "Range": 3.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "TimerRange": {
+    "Range": 3.3,
+    "Boost": 3.6,
+    "SlowSpeed": 0.2,
+    "OnlyGround": false,
+    "NotOnEat": true,
+    "OnlyKillaura": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "TriggerBot": {
+    "Min CPS": 8,
+    "Max CPS": 10,
+    "Attack 1.9+": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "BedAura": {
+    "Range": 4.5,
+    "Rate": 0.2,
+    "FOV": 360,
+    "Break Mode": 0,
+    "Auto Tool": true,
+    "Ignore Self": false,
+    "Pause KillAura": true,
+    "Render Box": true,
+    "Bed Side Color": {
+      "hsba": [
+        120,
+        68,
+        100,
+        60
+      ],
+      "dataBit": -1
+    },
+    "Bed Line Color": {
+      "hsba": [
+        120,
+        68,
+        100,
+        170
+      ],
+      "dataBit": -1
+    },
+    "Current Break Side Color": {
+      "hsba": [
+        0,
+        64,
+        100,
+        90
+      ],
+      "dataBit": -1
+    },
+    "Current Break Line Color": {
+      "hsba": [
+        0,
+        64,
+        100,
+        180
+      ],
+      "dataBit": -1
+    },
+    "Path Side Color": {
+      "hsba": [
+        191,
+        68,
+        100,
+        55
+      ],
+      "dataBit": -1
+    },
+    "Path Line Color": {
+      "hsba": [
+        191,
+        68,
+        100,
+        160
+      ],
+      "dataBit": -1
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Criticals": {
+    "Mode": 2,
+    "Auto Sprint": true,
+    "Bind": {
+      "keyBinds": [
+        67
+      ]
+    },
+    "Enabled": false
+  },
+  "Velocity": {
+    "Delay Till Ground": true,
+    "Multi Target": false,
+    "Fireball Cooldown": true,
+    "1.9+": false,
+    "Test Mode": false,
+    "Target Motion": 0.1,
+    "Release Distance": 2.6,
+    "Bind": {
+      "keyBinds": []
+    },
+    "Enabled": true
+  },
+  "KillAura": {
+    "Range": 3.0,
+    "Discover Offset": 3.0,
+    "Min CPS": 14.0,
+    "Max CPS": 15.0,
+    "Target Mode": 0,
+    "Switch delay": 0.0,
+    "Rotation Mode": 3,
+    "Sorted by": 2,
+    "Fix Rotation": false,
+    "Attack Cooldown": false,
+    "Check Auto FishRod": true,
+    "RayCast": true,
+    "Rotation Only RayCast": true,
+    "Noise": false,
+    "Keep Sprint": true,
+    "Auto Disable": true,
+    "Mark Mode": 0,
+    "Blocking Animation": true,
+    "Health Color": false,
+    "Side Color": {
+      "hsba": [
+        0,
+        96,
+        100,
+        70
+      ],
+      "dataBit": -1
+    },
+    "Line Color": {
+      "hsba": [
+        0,
+        96,
+        100,
+        150
+      ],
+      "dataBit": -1
+    },
+    "Bind": {
+      "keyBinds": [
+        82
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoSoup": {
+    "Health": 13.0,
+    "Min Delay": 300,
+    "Max Delay": 354.0,
+    "Auto Refill": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "AutoPot": {
+    "Health": 15,
+    "Healing": true,
+    "Speed": false,
+    "Jump Boost": false,
+    "Fire Resistance": false,
+    "Only Ground": true,
+    "Auto Refill": false,
+    "Delay": 500,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoRod": {
+    "Delay": 180.0,
+    "MinRange": 3.43,
+    "MaxRange": 5.86,
+    "Fov": 180.0,
+    "Predict Ticks": 2,
+    "KeepTime": 500,
+    "Bind": {
+      "keyBinds": [
+        78
+      ]
+    },
+    "Enabled": false
+  },
+  "GrimFull": {
+    "Bind": {
+      "keyBinds": [
+        88
+      ]
+    },
+    "Enabled": false
+  },
+  "HitBox": {
+    "XZExpand": 1.0,
+    "YExpand": 0.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Discord Presence": {
+    "Line 1 Text 1": "{player}",
+    "Line 1 Text 2": "{server}",
+    "Line 1 Update Delay": 200,
+    "Line 1 Select Mode": 0,
+    "Line 2 Text 1": "Southside - {client.version}",
+    "Line 2 Text 2": "{player.mode} Mode",
+    "Line 2 Text 3": "Playing on {server.difficulty} difficulty.",
+    "Line 2 Text 4": "{server.player_count} Players online",
+    "Line 2 Update Delay": 200,
+    "Line 2 Select Mode": 0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "GodItemDetector": {
+    "God Item Tags": 1,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "HackerDetector": {
+    "Log": false,
+    "Notification": true,
+    "Persist": false,
+    "Flag VL": 10.0,
+    "FastWeb Check": true,
+    "Blink Check": true,
+    "Scaffold Check": true,
+    "Test (Self)": false,
+    "VL Decay/s": 0.5,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoPixelParty": {
+    "Search Chunk Radius": 6,
+    "HotBar Index": 5,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "MatchingBypass": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "ServerCrasher": {
+    "Mode": 0,
+    "Yaw Increment": 1000,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "FuckOffHand": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "MurderFinder": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AntiExploit": {
+    "Show Notification": false,
+    "Destroy Self": true,
+    "Explode": true,
+    "Explode Power": true,
+    "Explode Max Motion": 100,
+    "Explode Max Strength": 100,
+    "Fake Death": true,
+    "GameState Crash": true,
+    "Demo Mode": true,
+    "Game Win": true,
+    "Illegal Velocity": true,
+    "Illegal Particles": true,
+    "Illegal PosLook": true,
+    "Illegal HealthUpdate": true,
+    "Illegal MoveSpeed": true,
+    "Particles Max Count": 100,
+    "Log4J Fix": true,
+    "Bind": {
+      "keyBinds": []
+    },
+    "Enabled": true
+  },
+  "ClientSpoof": {
+    "Spoof Mode": 1,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Bundle Dupe": {
+    "AP Delay": 30,
+    "APB Delay": 20,
+    "Packet Count": 20,
+    "Enable Sounds": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "ChatBypass": {
+    "Add Comma": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoReply": {
+    "Debug": false,
+    "Filter Words": true,
+    "Cooldown (s)": 5,
+    "Reply Loop": false,
+    "Loop Timeout (s)": 30,
+    "Auto Cooldown": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Disabler": {
+    "BadPackets A": true,
+    "BadPackets B": false,
+    "BadPackets D": false,
+    "BadPackets F": false,
+    "BadPackets P": false,
+    "BadPackets W": false,
+    "BadPackets X": false,
+    "BadPackets Y": false,
+    "Inventory": false,
+    "AimDuplicateLook": false,
+    "FastSwitch": false,
+    "AimStep": false,
+    "equalRotation": false,
+    "GrimPost": false,
+    "ShowLogging": false,
+    "LoggingLag": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "AutoPlay": {
+    "AutoScreenShot": true,
+    "ScreenCopy": false,
+    "AutoJoin": false,
+    "Auto3rdPerson": false,
+    "NextGameDelay": 0.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "AntiStaff": {
+    "Auto Hub": false,
+    "Hub Command": "/hub",
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "FakeLag": {
+    "StartRange": 5.58,
+    "ReleaseRange": 3.04,
+    "Delay": 300,
+    "RenderPos": true,
+    "Box Color": {
+      "hsba": [
+        204,
+        74,
+        100,
+        80
+      ],
+      "dataBit": -1
+    },
+    "AntiBow": false,
+    "AntiBow Range": 30.0,
+    "HitLog": false,
+    "ProgressBar": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AntiBot": {
+    "Check Shop": true,
+    "Check Invisible": false,
+    "Check LatestBot": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "Teams": {
+    "Mode": 0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "MCF": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "MineGame": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "BlockHunter": {
+    "Side Color": {
+      "hsba": [
+        22,
+        84,
+        100,
+        60
+      ],
+      "dataBit": -1
+    },
+    "Line Color": {
+      "hsba": [
+        22,
+        84,
+        100,
+        160
+      ],
+      "dataBit": -1
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "InventoryMove": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "NoJumpDelay": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "KeepSprint": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "StrafeFix": {
+    "Mode": 0,
+    "Target Strafe": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "LongJump": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "FastWeb": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "Flight": {
+    "Mode": 0,
+    "Horizontal": 1.0,
+    "Vertical": 0.78,
+    "Speed": 0.33,
+    "Release Delay": 300,
+    "View Bobbing": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Spider": {
+    "Mode": 0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "NoSlow": {
+    "Use Blink": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "NoSlowTest": {
+    "BowNoSlow": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "NoPush": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Sprint": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "Speed": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Timer": {
+    "Timer Speed": 1.9,
+    "Ticks": 20.0,
+    "ProgressBar": true,
+    "Auto Hide": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "GrimFly": {
+    "Mode": 1,
+    "Velocity HUD": true,
+    "Select Max Velocity": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "HealthBypass": {
+    "Smooth": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "AutoOffhand": {
+    "Min Health": 8.0,
+    "Heal Item": 0,
+    "Bedwars": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "InvManager": {
+    "Delay": 81.0,
+    "Offhand Items": 0,
+    "AutoArmor": true,
+    "Inventory Only": false,
+    "No Move": false,
+    "Switch Sword": true,
+    "Switch Block": true,
+    "Switch Pickaxe": true,
+    "Switch Axe": true,
+    "Switch Bow or Crossbow": false,
+    "Bow Priority": 2,
+    "Switch Water Bucket": true,
+    "Switch Ender Pearl": true,
+    "Switch Fireball": true,
+    "Switch Golden Apple": true,
+    "Throw Items": true,
+    "Keep Eggs \u0026 Snowballs": true,
+    "Switch Eggs \u0026 Snowballs": true,
+    "Switch Rod": false,
+    "Auto Disable": true,
+    "Sword Slot": 1.0,
+    "Block Slot": 2.0,
+    "Max Block Size": 512.0,
+    "Pickaxe Slot": 3.0,
+    "Axe Slot": 4.0,
+    "Bow Slot": 5.0,
+    "Max Arrow Size": 256.0,
+    "Water Bucket Slot": 6.0,
+    "Ender Pearl Slot": 7.0,
+    "Fireball Slot": 8.0,
+    "Golden Apple Slot": 9.0,
+    "Keep Water Buckets": 1.0,
+    "Keep Lava Buckets": 0.0,
+    "Keep Cobweb": 1.0,
+    "Eggs \u0026 Snowballs Slot": 5.0,
+    "Max Eggs \u0026 Snowballs Size": 64.0,
+    "Rod Slot": 9.0,
+    "Bind": {
+      "keyBinds": [
+        66
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoBucket": {
+    "AntiPause": true,
+    "MinDistance": 3.0,
+    "AutoMLG": true,
+    "AntiFire": true,
+    "Mace Priority": true,
+    "Fireball Cooldown": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "GhostHand": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "AutoTotem": {
+    "Health": 3,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Stealer": {
+    "Use Swap": false,
+    "Silently Stealing": false,
+    "Instant": false,
+    "Smart": false,
+    "DoubleClick": false,
+    "DoubleClickHalf": false,
+    "InvManage": false,
+    "InvManager Boost": false,
+    "Start Delay": 0.0,
+    "Close Delay": 130.0,
+    "Min Delay": 81.0,
+    "Max Delay": 83.0,
+    "Multi Stack Delay": 0.0,
+    "Ender Chest": false,
+    "Auto Disable": true,
+    "Bind": {
+      "keyBinds": [
+        66
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoTrap": {
+    "Range": 3.2,
+    "LavaRetrieve": 30,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "AntiVoid": {
+    "Fall Distance": 3,
+    "Debug": false,
+    "Max Attempt Times": 2.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AutoTool": {
+    "AutoWeapon": false,
+    "ShieldBreak": false,
+    "Mace on Fall": true,
+    "Mace Fall Distance": 4,
+    "Check Golden Axe": true,
+    "Spoof Item": true,
+    "Return Delay": 2,
+    "Bind": {
+      "keyBinds": [
+        77
+      ]
+    },
+    "Enabled": true
+  },
+  "KeyPearl": {
+    "Key Modes": 2,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "AntiWeb": {
+    "Recycle Tick": 10,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "NoFall": {
+    "Fall Distance": 3.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Blink": {
+    "Max Packets": 1,
+    "Slow Release": false,
+    "Ignore KeepAlive": false,
+    "Anti Aim": true,
+    "Arrow": true,
+    "Projectile": true,
+    "TNT": true,
+    "Player": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Stuck": {
+    "Disable Scaffold": false,
+    "Infnite": false,
+    "Bind": {
+      "keyBinds": [
+        90
+      ]
+    },
+    "Enabled": false
+  },
+  "Eagle": {
+    "Sneak Mode": 0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "BlockIn": {
+    "Delay": 50.0,
+    "AutoCenter": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "LightningTracker": {
+    "Use AddEntity": false,
+    "Use Sound": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "AntiLiquid": {
+    "Range": 4.0,
+    "Water": true,
+    "Lava": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "ChestWreck": {
+    "Range": 4.0,
+    "Min Delay": 30.0,
+    "Max Delay": 100.0,
+    "Block All Opened": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "ChestAura": {
+    "Range": 5.0,
+    "Min Delay": 280.0,
+    "Max Delay": 300.0,
+    "OpenStolenChest": false,
+    "RayCast": true,
+    "Ender Chest": false,
+    "NoMove": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "FastPlace": {
+    "Speed": 1,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "Scaffold": {
+    "Mode": 0,
+    "Always Update Rotation": true,
+    "PlaceTick": 1.0,
+    "RotationTick": 3.0,
+    "Spoof Item": true,
+    "No Swing": false,
+    "Eagle": false,
+    "Test OnGround": false,
+    "Fix Rotation": false,
+    "SlowUpTelly": false,
+    "Block Fly": false,
+    "Abuse Rotation": false,
+    "Jump Mode": 1,
+    "Clutch Safe Distance": 4.25,
+    "EagleTick": 1.0,
+    "KeepEagleTick": 4.0,
+    "Debug": true,
+    "Keep FoV": true,
+    "Fov": 1.1,
+    "Mark": false,
+    "DuplicateRotPlace": true,
+    "Interact Item Before Place": true,
+    "Mark Side Color": {
+      "hsba": [
+        0,
+        0,
+        100,
+        109
+      ],
+      "dataBit": -1
+    },
+    "Mark Line Color": {
+      "hsba": [
+        85,
+        53,
+        41,
+        0
+      ],
+      "dataBit": -1
+    },
+    "BlockCount": true,
+    "BlockCount Style": 0,
+    "BlockCount Y Offset": 0,
+    "Bind": {
+      "keyBinds": [
+        71
+      ]
+    },
+    "Enabled": false
+  },
+  "EntityEditor": {
+    "Model": 0,
+    "All Entities": false,
+    "Players": true,
+    "Mobs": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "LineBreakFormattor": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Player Appearance": {
+    "Client Cape": true,
+    "Player Skin": true,
+    "Dragon Wings": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "PotionEffects": {
+    "Style": 0,
+    "Potion HUD": {
+      "Locked": false,
+      "HUD Position": {
+        "anchor": "3",
+        "x": 20.0,
+        "y": -21.010826
+      },
+      "Scale": 0.6484314,
+      "Show in Chat": true,
+      "Show in F3 (Debug)": false,
+      "Show in GUIs": true
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "ItemHighlight": {
+    "Mode": 2,
+    "Color Sides": {
+      "hsba": [
+        123,
+        82,
+        97,
+        45
+      ],
+      "dataBit": -1
+    },
+    "Color Line": {
+      "hsba": [
+        123,
+        82,
+        97,
+        90
+      ],
+      "dataBit": -1
+    },
+    "Radius": 32,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Trajectories": {
+    "Other Players": true,
+    "Fired Projectiles": false,
+    "Fired Projectiles Only Pearl": false,
+    "Pearl Landing Tag": true,
+    "Pearl Tag Scale": 0.8,
+    "Pearl Tag Bg Alpha": 0.25,
+    "Accurate": true,
+    "Tnt": true,
+    "Simulation Steps": 500,
+    "Side Color": {
+      "hsba": [
+        0,
+        0,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Line Color": {
+      "hsba": [
+        0,
+        0,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "NameProtect": {
+    "Name": "宝马",
+    "Color": {
+      "hsba": [
+        294,
+        32,
+        96,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Protect IRC": true,
+    "IRC Color": {
+      "hsba": [
+        180,
+        65,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "ItemPhysics": {
+    "RandomRotation": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "ScoreBoard": {
+    "Style": 0,
+    "ScoreBoard": {
+      "No Score": true,
+      "Locked": false,
+      "HUD Position": {
+        "anchor": "2",
+        "x": 1.5258789E-5,
+        "y": 126.38269
+      },
+      "Scale": 1.0095239,
+      "Show in Chat": true,
+      "Show in F3 (Debug)": false,
+      "Show in GUIs": true
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "FullBright": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "OldHitting": {
+    "Mode": 22,
+    "Speed": 1.0,
+    "BlockedX": 0,
+    "BlockedY": 0,
+    "BlockedZ": 0,
+    "X": 0,
+    "Y": 0,
+    "Z": 0,
+    "Axe": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "KillEffect": {
+    "All": false,
+    "Mobs": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "CriticalParticle": {
+    "Mode": 2,
+    "Multiplier": 1,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "WorldManager": {
+    "Time": true,
+    "Time Mode": 0,
+    "Time Value": 1,
+    "Time Speed": 2.0,
+    "Weather": false,
+    "Weather Mode": 0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "TargetHUD": {
+    "Mode": 7,
+    "Multiple Targets": true,
+    "Target HUD": {
+      "Locked": false,
+      "HUD Position": {
+        "anchor": "5",
+        "x": -220.5,
+        "y": 37.346092
+      },
+      "Scale": 1.0,
+      "Show in Chat": true,
+      "Show in F3 (Debug)": false,
+      "Show in GUIs": true
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "Chatting": {
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "ChestESP": {
+    "Mode": 2,
+    "Range": 64.0,
+    "UnOpened Color Sides": {
+      "hsba": [
+        123,
+        82,
+        97,
+        45
+      ],
+      "dataBit": -1
+    },
+    "Opened Color Sides": {
+      "hsba": [
+        3,
+        86,
+        97,
+        45
+      ],
+      "dataBit": -1
+    },
+    "UnOpened Color Line": {
+      "hsba": [
+        123,
+        82,
+        97,
+        90
+      ],
+      "dataBit": -1
+    },
+    "Opened Color Line": {
+      "hsba": [
+        3,
+        86,
+        97,
+        90
+      ],
+      "dataBit": -1
+    },
+    "Self Stolen Color Sides": {
+      "hsba": [
+        42,
+        37,
+        21,
+        45
+      ],
+      "dataBit": -1
+    },
+    "Self Stolen Color Line": {
+      "hsba": [
+        350,
+        61,
+        82,
+        90
+      ],
+      "dataBit": -1
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "CustomFOV": {
+    "FOV": 300.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "NoRender": {
+    "Potions": false,
+    "Explosions": false,
+    "FlowerRocket": true,
+    "HurtCam": true,
+    "Armor": false,
+    "NoArmorStands": false,
+    "BreakParticles": true,
+    "Bossbar": true,
+    "Nausea": true,
+    "Blindness": true,
+    "Vanilla Effects": false,
+    "Fishing Hook": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "ViewClip": {
+    "Scale": 1.2,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "Detector": {
+    "Distance Scale": false,
+    "Custom Scale": true,
+    "Scale": 0.7,
+    "Respect Targets": true,
+    "Show Distance": true,
+    "Show Protection": true,
+    "Show Potions": true,
+    "Range": 40.0,
+    "Offset Y": 0.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "NameTags": {
+    "Style": 1,
+    "Distance Scale": false,
+    "Show GodItem": true,
+    "Show Murder": true,
+    "Hide Vanilla Name": true,
+    "Hide Me": true,
+    "Custom Scale": true,
+    "Background Glow": false,
+    "Display IRC": true,
+    "Scale": 0.5,
+    "Bind": {
+      "keyBinds": [
+        74
+      ]
+    },
+    "Enabled": true
+  },
+  "ItemTag": {
+    "Scale": 0.8,
+    "Merge Radius": 1.0,
+    "Background Alpha": 0.15,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Item2D": {
+    "Scale": 1.0,
+    "Bobbing": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "ItemHud": {
+    "Item HUD": {
+      "Diamond": true,
+      "Emerald": true,
+      "Iron Ingot": true,
+      "Gold Ingot": true,
+      "Mushroom Stew": true,
+      "Scaffold Blocks": true,
+      "God Items": true,
+      "Hide Zero Count": false,
+      "Locked": false,
+      "HUD Position": {
+        "anchor": "8",
+        "x": 0.0,
+        "y": 0.0
+      },
+      "Scale": 1.0,
+      "Show in Chat": true,
+      "Show in F3 (Debug)": false,
+      "Show in GUIs": true
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "BedShow": {
+    "Search Radius": 18.0,
+    "Scale": 1.0,
+    "Background Alpha": 0.2,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "Compass": {
+    "Compass Only": true,
+    "No Player Only": true,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "ESP2D": {
+    "Players": false,
+    "Animals": false,
+    "Mobs": false,
+    "Invisible": false,
+    "Passives": true,
+    "Dropped Items": true,
+    "Health Bar": false,
+    "Tags": true,
+    "Filled": false,
+    "Box": false,
+    "BoxMode": 1,
+    "Tag Size": 5.0,
+    "Thickness": 1.5,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Theme": {
+    "Color": 0,
+    "Color Speed": 15.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "Glow": {
+    "Mode": 0,
+    "Teammate Color": {
+      "hsba": [
+        152,
+        100,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Enemy Color": {
+      "hsba": [
+        0,
+        0,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Use Armor Color": true,
+    "Fallback Color": {
+      "hsba": [
+        0,
+        0,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Player Color": {
+      "hsba": [
+        0,
+        0,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Animal Color": {
+      "hsba": [
+        120,
+        100,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Monster Color": {
+      "hsba": [
+        0,
+        100,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Item Color": {
+      "hsba": [
+        50,
+        100,
+        100,
+        255
+      ],
+      "dataBit": -1
+    },
+    "Items Glow": true,
+    "God Items": true,
+    "Bedwars Items": false,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": true
+  },
+  "HUD": {
+    "Hotbar": true,
+    "Hotbar Animation": true,
+    "Info": true,
+    "User Name": "Player",
+    "Server Replace to": "Heypixel",
+    "Sticker": {
+      "Locked": false,
+      "HUD Position": {
+        "anchor": "0",
+        "x": 0.0,
+        "y": 0.0
+      },
+      "Scale": 1.0,
+      "Show in Chat": true,
+      "Show in F3 (Debug)": false,
+      "Show in GUIs": true
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "TNTips": {
+    "TNT Warning": true,
+    "Warning Range": 30.0,
+    "Warning Sound": true,
+    "TNT Countdown": true,
+    "Countdown Scale": 1.5,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "FakerVSBin": {
+    "Scroll Text": "鏈奖鐗囩敱鏉辨柟绱呭皪鎴板钩鑷哄偩鎯呰磰鍔?1?7  鏈奖鐗囪硣婧愬儏渚涘缈掍氦娴佷娇鐢?1?7,鍒囧嬁鐢ㄦ柤鍏朵粬鐢ㄩ?1?7?1?7",
+    "Font Size": 14.0,
+    "Scroll Speed": 2.0,
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  },
+  "InventoryHUD": {
+    "Style": 0,
+    "Inventory": {
+      "Background": true,
+      "Background Alpha": 120,
+      "Show Title": true,
+      "Bind to Tab": false,
+      "Locked": false,
+      "HUD Position": {
+        "anchor": "0",
+        "x": 0.0,
+        "y": 0.0
+      },
+      "Scale": 1.0,
+      "Show in Chat": true,
+      "Show in F3 (Debug)": false,
+      "Show in GUIs": true
+    },
+    "Bind": {
+      "keyBinds": [
+        -1
+      ]
+    },
+    "Enabled": false
+  }
+}

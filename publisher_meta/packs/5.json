@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": 5,
+  "name": "NewWzy  config",
+  "author": "NewWzy",
+  "summary": "NewWzy config",
+  "type": "安全",
+  "version": 1,
+  "date": "2026-05-31T08:03:08Z",
+  "southsideVersion": "",
+  "sourceFile": "packs/config.json",
+  "createdAt": "2026-05-31T08:03:11Z"
+}
