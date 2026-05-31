@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "id": 10,
-  "name": "枫的cfg",
-  "author": "枫",
-  "summary": "枫的cfg",
+  "name": "AtriMyDearMoment的cfg",
+  "author": "AtriMyDearMoment",
+  "summary": "AtriMyDearMoment的cfg",
   "type": "暴力",
   "version": 1,
-  "date": "2026-05-31T13:30:16Z",
+  "date": "2026-05-31T13:34:46Z",
   "southsideVersion": "20260524",
-  "sourceFile": "packs/feng_cfg.json",
+  "sourceFile": "packs/AtriMyDearMoment_cfg.json",
   "createdAt": "2026-05-31T13:30:19Z"
 }
