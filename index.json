@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-31T08:22:56Z",
-  "maxPackId": 8,
+  "generatedAt": "2026-05-31T12:50:40Z",
+  "maxPackId": 9,
   "packs": [
     {
       "id": 2,
@@ -66,11 +66,11 @@
       "summary": "伊雷娜cfg目前sca死号",
       "type": "暴力",
       "version": 1,
-      "date": "2026-05-31T08:15:03Z",
+      "date": "2026-05-31T12:49:45Z",
       "southsideVersion": "20260524",
       "sha256": "ab98b72ba4808c178df15479c02bc061f133b8546c221347fe61ac7163d7aa31",
-      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/E1aina1337_cfgjson.json",
-      "fileName": "E1aina1337_cfgjson.json",
+      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/E1aina1337_cfg.json",
+      "fileName": "E1aina1337_cfg.json",
       "sizeBytes": 31172
     },
     {
@@ -86,6 +86,20 @@
       "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/KagheBeta.json",
       "fileName": "KagheBeta.json",
       "sizeBytes": 31257
+    },
+    {
+      "id": 9,
+      "name": "E1aina1337安全cfg",
+      "author": "E1aina1337",
+      "summary": "伊雷娜安全cfg",
+      "type": "安全",
+      "version": 1,
+      "date": "2026-05-31T12:50:38Z",
+      "southsideVersion": "20260524",
+      "sha256": "fe6b9f69c173b257ea67654b277dcac6eddd37bd76594a1cf07ee52e02c5aa1d",
+      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/E1aina1337_safecfg.json",
+      "fileName": "E1aina1337_safecfg.json",
+      "sizeBytes": 31027
     }
   ]
 }

@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
-  "maxPackId": 8,
+  "maxPackId": 9,
   "bindings": {
     "packs/BSKCFG.json": 2,
-    "packs/E1aina1337_cfgjson.json": 7,
+    "packs/E1aina1337_cfg.json": 7,
+    "packs/E1aina1337_safecfg.json": 9,
     "packs/Float-cfg.json": 4,
     "packs/KagheBeta.json": 8,
     "packs/NewWzyCFG.json": 6,

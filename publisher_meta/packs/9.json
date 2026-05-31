@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": 9,
+  "name": "E1aina1337安全cfg",
+  "author": "E1aina1337",
+  "summary": "伊雷娜安全cfg",
+  "type": "安全",
+  "version": 1,
+  "date": "2026-05-31T12:50:38Z",
+  "southsideVersion": "20260524",
+  "sourceFile": "packs/E1aina1337_safecfg.json",
+  "createdAt": "2026-05-31T12:50:05Z"
+}
