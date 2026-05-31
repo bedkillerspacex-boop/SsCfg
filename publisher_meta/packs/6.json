@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": 6,
+  "name": "NewWzyCFG",
+  "author": "",
+  "summary": "NewWzyCFG",
+  "type": "安全",
+  "version": 1,
+  "date": "2026-05-31T08:06:30Z",
+  "southsideVersion": "",
+  "sourceFile": "packs/NewWzyCFG.json",
+  "createdAt": "2026-05-31T08:06:41Z"
+}
