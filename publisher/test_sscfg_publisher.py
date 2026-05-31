@@ -1,4 +1,5 @@
 import importlib.util
+import os
 import sys
 import tempfile
 import unittest
@@ -16,6 +17,9 @@ SPEC.loader.exec_module(sp)
 
 
 class SouthsidePublisherTests(unittest.TestCase):
+    FIXED_TS_1 = 1717027200
+    FIXED_TS_2 = 1717113600
+
     def make_repo(self) -> Path:
         temp_dir = Path(tempfile.mkdtemp(prefix="southside-publisher-"))
         (temp_dir / "packs").mkdir(parents=True)
@@ -25,6 +29,9 @@ class SouthsidePublisherTests(unittest.TestCase):
         path = repo_dir / "packs" / name
         path.write_text(content, encoding="utf-8")
         return path
+
+    def set_mtime(self, path: Path, timestamp: int) -> None:
+        os.utime(path, (timestamp, timestamp))
 
     def test_publish_allocates_next_id_and_updates_registry(self) -> None:
         repo_dir = self.make_repo()
@@ -114,8 +121,10 @@ class SouthsidePublisherTests(unittest.TestCase):
     def test_rebuild_index_preserves_pack_bytes_and_emits_manual_fields(self) -> None:
         repo_dir = self.make_repo()
         pack_path = self.write_pack(repo_dir, "demo.json", '{\n  "x": "a"\n}\n')
+        self.set_mtime(pack_path, self.FIXED_TS_1)
         before = pack_path.read_bytes()
         published_before = sp.published_source_bytes(before)
+        expected_date = sp.source_file_modified_at(repo_dir, "packs/demo.json")
 
         meta = sp.publish_source_file(repo_dir, "packs/demo.json")
         meta = sp.replace(
@@ -138,7 +147,7 @@ class SouthsidePublisherTests(unittest.TestCase):
         pack = result.index_data["packs"][0]
         self.assertEqual(before, after)
         self.assertEqual(pack["version"], 7)
-        self.assertEqual(pack["date"], "2026-05-30")
+        self.assertEqual(pack["date"], expected_date)
         self.assertEqual(pack["southsideVersion"], "1.21.80")
         self.assertEqual(pack["author"], "Alice")
         self.assertEqual(pack["summary"], "Notes")
@@ -149,7 +158,8 @@ class SouthsidePublisherTests(unittest.TestCase):
 
     def test_source_edit_changes_index_hash_without_touching_sidecar_fields(self) -> None:
         repo_dir = self.make_repo()
-        self.write_pack(repo_dir, "demo.json", '{"x":"a"}\n')
+        pack_path = self.write_pack(repo_dir, "demo.json", '{"x":"a"}\n')
+        self.set_mtime(pack_path, self.FIXED_TS_1)
         meta = sp.publish_source_file(repo_dir, "packs/demo.json")
         meta = sp.replace(
             meta,
@@ -164,11 +174,14 @@ class SouthsidePublisherTests(unittest.TestCase):
         sp.write_pack_meta(repo_dir, meta)
         first_result = sp.build_index_data("bedkillerspacex-boop/SouthsideConfigLoader", "master", sp.scan_repository_state(repo_dir))
         first_pack = first_result.index_data["packs"][0]
+        first_expected_date = sp.source_file_modified_at(repo_dir, "packs/demo.json")
 
         sp.write_source_text(repo_dir, "packs/demo.json", '{"x":"b"}')
+        self.set_mtime(pack_path, self.FIXED_TS_2)
 
         second_result = sp.build_index_data("bedkillerspacex-boop/SouthsideConfigLoader", "master", sp.scan_repository_state(repo_dir))
         second_pack = second_result.index_data["packs"][0]
+        second_expected_date = sp.source_file_modified_at(repo_dir, "packs/demo.json")
 
         self.assertNotEqual(first_pack["sha256"], second_pack["sha256"])
         self.assertEqual(second_pack["name"], "Demo")
@@ -176,7 +189,9 @@ class SouthsidePublisherTests(unittest.TestCase):
         self.assertEqual(second_pack["summary"], "Summary")
         self.assertEqual(second_pack["type"], "安全")
         self.assertEqual(second_pack["version"], 3)
-        self.assertEqual(second_pack["date"], "2026-05-30")
+        self.assertEqual(first_pack["date"], first_expected_date)
+        self.assertEqual(second_pack["date"], second_expected_date)
+        self.assertNotEqual(first_pack["date"], second_pack["date"])
         self.assertEqual(second_pack["southsideVersion"], "1.21.80")
 
     def test_default_meta_uses_safe_type(self) -> None:

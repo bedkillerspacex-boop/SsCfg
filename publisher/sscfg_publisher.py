@@ -122,6 +122,10 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def timestamp_to_utc_text(timestamp: float) -> str:
+    return datetime.fromtimestamp(timestamp, timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
 def clean_string(value: object) -> str:
     if not isinstance(value, str):
         return ""
@@ -473,6 +477,13 @@ def source_path_for_file(repo_dir: Path, source_file: str) -> Path:
     return repo_dir.joinpath(*normalized.split("/"))
 
 
+def source_file_modified_at(repo_dir: Path, source_file: str) -> str:
+    path = source_path_for_file(repo_dir, source_file)
+    if not path.exists():
+        raise PublishError(f"婧愭枃浠朵笉瀛樺湪: {source_file}")
+    return timestamp_to_utc_text(path.stat().st_mtime)
+
+
 def source_pack_from_file(repo_dir: Path, source_file: str) -> SourcePack:
     path = source_path_for_file(repo_dir, source_file)
     if not path.exists():
@@ -653,9 +664,10 @@ def reverse_bindings(bindings: dict[str, int]) -> dict[int, str]:
     return results
 
 
-def default_meta_for_source(pack_id: int, source_file: str) -> PackMeta:
+def default_meta_for_source(pack_id: int, source_file: str, repo_dir: Path | None = None) -> PackMeta:
     stem = Path(source_file).stem
     now = utc_now()
+    file_date = source_file_modified_at(repo_dir, source_file) if repo_dir is not None else now
     return PackMeta(
         pack_id=pack_id,
         name=stem,
@@ -663,7 +675,7 @@ def default_meta_for_source(pack_id: int, source_file: str) -> PackMeta:
         summary=stem,
         pack_type=PACK_TYPE_SAFE,
         version=1,
-        date=now,
+        date=file_date,
         southside_version="",
         source_file=source_file,
         created_at=now,
@@ -689,7 +701,7 @@ def scan_repository_state(repo_dir: Path) -> ScanState:
             continue
         if meta is None:
             assert source_file_from_registry is not None
-            meta = default_meta_for_source(pack_id, source_file_from_registry)
+            meta = default_meta_for_source(pack_id, source_file_from_registry, repo_dir)
             record_warnings.append(f"id {pack_id}: 缺少 sidecar 元数据，已使用默认值")
         if source_file_from_registry and meta.source_file != source_file_from_registry:
             record_warnings.append(
@@ -697,6 +709,8 @@ def scan_repository_state(repo_dir: Path) -> ScanState:
             )
             meta = replace(meta, source_file=source_file_from_registry)
         source = source_by_rel.get(meta.source_file)
+        if source is not None:
+            meta = replace(meta, date=source_file_modified_at(repo_dir, meta.source_file))
         status = "已发布" if source is not None else "源文件缺失"
         if source is None:
             record_warnings.append(f"id {pack_id}: 已绑定的源文件不存在: {meta.source_file}")
@@ -762,7 +776,12 @@ def publish_source_file(repo_dir: Path, source_file: str, meta_template: PackMet
     if source_file in state.registry.bindings:
         raise PublishError(f"源文件已经绑定了 id: {source_file}")
     new_id = allocate_pack_id(state.registry)
-    meta = default_meta_for_source(new_id, source_file) if meta_template is None else replace(meta_template, pack_id=new_id, source_file=source_file)
+    source_date = source_file_modified_at(repo_dir, source_file)
+    meta = (
+        default_meta_for_source(new_id, source_file, repo_dir)
+        if meta_template is None
+        else replace(meta_template, pack_id=new_id, source_file=source_file, date=source_date)
+    )
     state.registry.bindings[source_file] = new_id
     write_registry(repo_dir, state.registry)
     write_pack_meta(repo_dir, meta)
@@ -996,7 +1015,7 @@ class PublisherApp(Tk):
         ttk.Label(form, text="当前目标").grid(row=4, column=0, sticky=W, pady=4)
         ttk.Label(form, textvariable=self.target_var).grid(row=4, column=1, columnspan=3, sticky=W, padx=8, pady=4)
 
-        ttk.Checkbutton(form, text="保存元数据时自动把日期刷新为当前时间", variable=self.auto_refresh_date_var).grid(
+        ttk.Checkbutton(form, text="保存元数据时自动按源文件最后修改时间刷新日期", variable=self.auto_refresh_date_var).grid(
             row=5, column=0, columnspan=4, sticky=W, pady=(4, 8)
         )
 
@@ -1010,7 +1029,7 @@ class PublisherApp(Tk):
             ttk.Button(action_bar, text="发布当前项", command=self.publish_selected_source),
             ttk.Button(action_bar, text="保存源 JSON", command=self.save_current_source_json),
             ttk.Button(action_bar, text="保存元数据", command=self.save_current_metadata),
-            ttk.Button(action_bar, text="刷新日期", command=self.refresh_current_date),
+            ttk.Button(action_bar, text="同步文件日期", command=self.refresh_current_date),
             ttk.Button(action_bar, text="重新绑定", command=self.rebind_current_record),
             ttk.Button(action_bar, text="预览", command=self.preview_index),
             ttk.Button(action_bar, text="重建索引", command=self.rebuild_index),
@@ -1345,7 +1364,10 @@ class PublisherApp(Tk):
 
     def build_form_meta(self, pack_id: int | None, source_file: str) -> PackMeta:
         version = parse_version_text(self.record_version_var.get().strip() or "1")
-        date = self.record_date_var.get().strip() or utc_now()
+        try:
+            date = source_file_modified_at(self.scan_state.repo_dir, source_file) if self.scan_state is not None else utc_now()
+        except PublishError:
+            date = self.record_date_var.get().strip() or utc_now()
         return PackMeta(
             pack_id=pack_id or 0,
             name=self.record_name_var.get().strip() or Path(source_file).stem,
@@ -1423,8 +1445,7 @@ class PublisherApp(Tk):
                     self.load_form(None)
                     return
                 self.current_kind = "unpublished"
-                draft = default_meta_for_source(0, source.rel_path)
-                draft = replace(draft, date=utc_now())
+                draft = default_meta_for_source(0, source.rel_path, self.scan_state.repo_dir)
                 self.populate_form_from_meta(draft, "未发布", f"下一个: {self.scan_state.registry.max_pack_id + 1}")
             source_text = read_source_text(self.scan_state.repo_dir, self.record_source_file_var.get().strip()) if self.current_kind else ""
             self.set_source_editor_text(source_text)
@@ -1544,7 +1565,11 @@ class PublisherApp(Tk):
             messagebox.showerror("Southside 发布器", str(exc))
 
     def refresh_current_date(self) -> None:
-        self.record_date_var.set(utc_now())
+        try:
+            repo_dir, _, _ = self.resolve_inputs()
+            self.record_date_var.set(source_file_modified_at(ensure_repo_dir(str(repo_dir)), self.current_source_file()))
+        except Exception:
+            self.record_date_var.set(utc_now())
 
     def current_published_id(self) -> int:
         if self.current_kind != "published":
@@ -1577,8 +1602,11 @@ class PublisherApp(Tk):
         )
         if existing is not None:
             meta = replace(meta, created_at=existing.created_at)
-        if self.auto_refresh_date_var.get():
-            meta = replace(meta, date=utc_now())
+        try:
+            meta = replace(meta, date=source_file_modified_at(repo_dir, source_file))
+        except PublishError:
+            if self.auto_refresh_date_var.get():
+                meta = replace(meta, date=utc_now())
         save_metadata(repo_dir, meta)
         return meta
 
