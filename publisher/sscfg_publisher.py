@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -477,6 +479,41 @@ def source_path_for_file(repo_dir: Path, source_file: str) -> Path:
     return repo_dir.joinpath(*normalized.split("/"))
 
 
+def normalize_source_file_name(file_name: str) -> str:
+    text = clean_string(file_name)
+    if not text:
+        raise PublishError("file name cannot be empty")
+    if "/" in text or "\\" in text:
+        raise PublishError("file name cannot contain path separators")
+    if not text.lower().endswith(".json"):
+        text = f"{text}.json"
+    return text
+
+
+def import_source_file(repo_dir: Path, selected_path: Path) -> SourcePack:
+    repo_root = repo_dir.resolve()
+    file_path = selected_path.expanduser().resolve()
+    if not file_path.exists() or not file_path.is_file():
+        raise PublishError(f"source file does not exist: {selected_path}")
+    try:
+        relative = file_path.relative_to(repo_root)
+        relative_text = relative.as_posix()
+        if relative_text.startswith("packs/"):
+            return source_pack_from_file(repo_dir, normalize_source_file(relative_text))
+    except ValueError:
+        pass
+    if file_path.suffix.lower() != ".json":
+        raise PublishError(f"only .json files can be imported: {file_path.name}")
+    validate_source_json_text(file_path.read_text(encoding="utf-8-sig"), file_path.name)
+    source_file = normalize_source_file(f"packs/{normalize_source_file_name(file_path.name)}")
+    target_path = source_path_for_file(repo_dir, source_file)
+    if target_path.exists():
+        raise PublishError(f"file already exists: {source_file}")
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(file_path, target_path)
+    return source_pack_from_file(repo_dir, source_file)
+
+
 def source_file_modified_at(repo_dir: Path, source_file: str) -> str:
     path = source_path_for_file(repo_dir, source_file)
     if not path.exists():
@@ -789,19 +826,43 @@ def publish_source_file(repo_dir: Path, source_file: str, meta_template: PackMet
 
 
 def create_source_file(repo_dir: Path, file_name: str, initial_text: str = "{}") -> SourcePack:
-    file_name = clean_string(file_name)
-    if not file_name:
-        raise PublishError("文件名不能为空")
-    if "/" in file_name or "\\" in file_name:
-        raise PublishError("新建 JSON 只能填写文件名，不能包含路径")
-    if not file_name.lower().endswith(".json"):
-        file_name = f"{file_name}.json"
+    file_name = normalize_source_file_name(file_name)
     source_file = normalize_source_file(f"packs/{file_name}")
     path = source_path_for_file(repo_dir, source_file)
     if path.exists():
         raise PublishError(f"文件已存在: {source_file}")
     write_source_text(repo_dir, source_file, initial_text)
     return source_pack_from_file(repo_dir, source_file)
+
+
+def rename_source_file(repo_dir: Path, source_file: str, new_file_name: str) -> str:
+    source_file = normalize_source_file(source_file)
+    new_source_file = normalize_source_file(f"packs/{normalize_source_file_name(new_file_name)}")
+    if new_source_file == source_file:
+        return source_file
+
+    source_path = source_path_for_file(repo_dir, source_file)
+    if not source_path.exists():
+        raise PublishError(f"源文件不存在: {source_file}")
+
+    target_path = source_path_for_file(repo_dir, new_source_file)
+    if target_path.exists():
+        raise PublishError(f"文件已存在: {new_source_file}")
+
+    before_stat = source_path.stat()
+    source_path.rename(target_path)
+    os.utime(target_path, (before_stat.st_atime, before_stat.st_mtime))
+
+    registry = load_registry(repo_dir)
+    pack_id = registry.bindings.pop(source_file, None)
+    if pack_id is not None:
+        registry.bindings[new_source_file] = pack_id
+        write_registry(repo_dir, registry)
+        sidecar = load_sidecars(repo_dir).get(pack_id)
+        if sidecar is not None:
+            write_pack_meta(repo_dir, replace(sidecar, source_file=new_source_file))
+
+    return new_source_file
 
 
 def delete_source_file(repo_dir: Path, source_file: str) -> None:
@@ -1025,6 +1086,7 @@ class PublisherApp(Tk):
             ttk.Button(action_bar, text="扫描仓库", command=self.scan_repository),
             ttk.Button(action_bar, text="新建 JSON", command=self.create_new_json),
             ttk.Button(action_bar, text="选择已有 JSON", command=self.choose_existing_json),
+            ttk.Button(action_bar, text="重命名 JSON", command=self.rename_current_json),
             ttk.Button(action_bar, text="删除当前项", command=self.delete_current_item),
             ttk.Button(action_bar, text="发布当前项", command=self.publish_selected_source),
             ttk.Button(action_bar, text="保存源 JSON", command=self.save_current_source_json),
@@ -1492,10 +1554,31 @@ class PublisherApp(Tk):
             )
             if not selected:
                 return
-            source_file = source_file_from_path(repo_dir, Path(selected))
+            source = import_source_file(repo_dir, Path(selected))
             self.load_state(repo_dir)
-            self.focus_source_file(source_file)
-            self.log(f"已选择 {source_file}")
+            self.focus_source_file(source.rel_path)
+            self.log(f"已导入 {source.rel_path}")
+        except Exception as exc:
+            messagebox.showerror("Southside 发布器", str(exc))
+
+    def rename_current_json(self) -> None:
+        if self.busy:
+            return
+        try:
+            if self.current_kind is None:
+                raise PublishError("请先选择一个包")
+            repo_dir, _, _ = self.resolve_inputs()
+            repo_dir = ensure_repo_dir(str(repo_dir))
+            source_file = self.current_source_file()
+            current_name = Path(source_file).name
+            new_name = simpledialog.askstring("重命名 JSON", "输入新的 JSON 文件名", initialvalue=current_name, parent=self)
+            if new_name is None:
+                return
+            new_source_file = rename_source_file(repo_dir, source_file, new_name)
+            self.load_state(repo_dir)
+            self.focus_source_file(new_source_file)
+            self.log(f"已重命名 {source_file} -> {new_source_file}")
+            messagebox.showinfo("Southside 发布器", f"已重命名为 {Path(new_source_file).name}")
         except Exception as exc:
             messagebox.showerror("Southside 发布器", str(exc))
 

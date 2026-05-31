@@ -110,6 +110,22 @@ class SouthsidePublisherTests(unittest.TestCase):
         self.assertTrue((repo_dir / "packs" / "new_pack.json").exists())
         self.assertEqual((repo_dir / "packs" / "new_pack.json").read_text(encoding="utf-8"), '{"ok":true}\n')
 
+    def test_import_source_file_copies_external_json_and_preserves_mtime(self) -> None:
+        repo_dir = self.make_repo()
+        external_dir = Path(tempfile.mkdtemp(prefix="southside-publisher-external-"))
+        external_path = external_dir / "demo.json"
+        external_path.write_text('{"a":1}\n', encoding="utf-8")
+        self.set_mtime(external_path, self.FIXED_TS_1)
+
+        source = sp.import_source_file(repo_dir, external_path)
+        imported_path = repo_dir / source.rel_path
+
+        self.assertEqual(source.rel_path, "packs/demo.json")
+        self.assertTrue(imported_path.exists())
+        self.assertEqual(imported_path.read_text(encoding="utf-8"), '{"a":1}\n')
+        self.assertEqual(imported_path.stat().st_mtime, float(self.FIXED_TS_1))
+        self.assertEqual(sp.source_file_modified_at(repo_dir, source.rel_path), sp.timestamp_to_utc_text(self.FIXED_TS_1))
+
     def test_delete_source_file_removes_unpublished_json(self) -> None:
         repo_dir = self.make_repo()
         pack_path = self.write_pack(repo_dir, "demo.json", '{"a":1}\n')
@@ -242,6 +258,37 @@ class SouthsidePublisherTests(unittest.TestCase):
             "https://raw.githubusercontent.com/temp/test/refs/heads/master/packs/demo.json",
         )
 
+    def test_save_metadata_only_does_not_touch_source_file_mtime(self) -> None:
+        repo_dir = self.make_repo()
+        (repo_dir / ".git").mkdir()
+        pack_path = self.write_pack(repo_dir, "demo.json", '{"a":1}\n')
+        self.set_mtime(pack_path, self.FIXED_TS_1)
+        sp.publish_source_file(repo_dir, "packs/demo.json")
+        before_mtime = pack_path.stat().st_mtime
+
+        original_preferred_repo_dir = sp.preferred_repo_dir
+        try:
+            sp.preferred_repo_dir = lambda _owner_repo: repo_dir
+            with mock.patch.object(sp.messagebox, "showinfo", lambda *args, **kwargs: None), mock.patch.object(
+                sp.messagebox, "showerror", lambda *args, **kwargs: None
+            ):
+                app = sp.PublisherApp()
+                try:
+                    app.withdraw()
+                    app.owner_repo_var.set("temp/test")
+                    app.branch_var.set("master")
+                    app.load_state(repo_dir)
+                    app.focus_source_file("packs/demo.json")
+                    app.record_author_var.set("Bob")
+                    app.save_current_metadata(show_message=False)
+                finally:
+                    app.destroy()
+        finally:
+            sp.preferred_repo_dir = original_preferred_repo_dir
+
+        after_mtime = pack_path.stat().st_mtime
+        self.assertEqual(before_mtime, after_mtime)
+
     def test_unpublish_pack_deletes_binding_but_keeps_max_pack_id_monotonic(self) -> None:
         repo_dir = self.make_repo()
         self.write_pack(repo_dir, "one.json", '{"a":1}\n')
@@ -283,6 +330,26 @@ class SouthsidePublisherTests(unittest.TestCase):
 
         self.assertEqual(meta.source_file, "packs/two.json")
         self.assertEqual(registry.bindings, {"packs/two.json": 1})
+
+    def test_rename_source_file_preserves_mtime_and_updates_binding(self) -> None:
+        repo_dir = self.make_repo()
+        pack_path = self.write_pack(repo_dir, "demo.json", '{"a":1}\n')
+        self.set_mtime(pack_path, self.FIXED_TS_1)
+        sp.publish_source_file(repo_dir, "packs/demo.json")
+
+        new_source_file = sp.rename_source_file(repo_dir, "packs/demo.json", "renamed.json")
+        renamed_path = repo_dir / "packs" / "renamed.json"
+        registry = sp.load_registry(repo_dir)
+        sidecar = sp.load_sidecars(repo_dir)[1]
+
+        self.assertEqual(new_source_file, "packs/renamed.json")
+        self.assertFalse(pack_path.exists())
+        self.assertTrue(renamed_path.exists())
+        self.assertEqual(renamed_path.stat().st_mtime, float(self.FIXED_TS_1))
+        self.assertEqual(registry.max_pack_id, 1)
+        self.assertEqual(registry.bindings, {"packs/renamed.json": 1})
+        self.assertEqual(sidecar.source_file, "packs/renamed.json")
+        self.assertEqual(sp.source_file_modified_at(repo_dir, "packs/renamed.json"), sp.timestamp_to_utc_text(self.FIXED_TS_1))
 
     def test_missing_source_warns_and_is_skipped_from_index(self) -> None:
         repo_dir = self.make_repo()
