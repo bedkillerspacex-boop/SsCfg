@@ -9,10 +9,10 @@
       "Background": true,
       "Round Background": true,
       "Font": 2,
-      "Color": 2,
+      "Color": 0,
       "Custom Color A": {
         "hsba": [
-          303,
+          243,
           0,
           100,
           255
@@ -23,12 +23,12 @@
         "hsba": [
           0,
           0,
-          100,
-          255
+          29,
+          221
         ],
         "dataBit": -1
       },
-      "Custom Speed": 9.7,
+      "Custom Speed": 5.0,
       "Locked": false,
       "HUD Position": {
         "anchor": "2",
@@ -390,7 +390,7 @@
         71
       ]
     },
-    "Enabled": false
+    "Enabled": true
   },
   "AutoSoup": {
     "Health": 13.0,
@@ -673,7 +673,7 @@
     "Bind": {
       "keyBinds": []
     },
-    "Enabled": true
+    "Enabled": false
   },
   "AntiBot": {
     "Check Shop": true,
@@ -1358,7 +1358,7 @@
     "Style": 0,
     "ScoreBoard": {
       "No Score": true,
-      "Locked": false,
+      "Locked": true,
       "HUD Position": {
         "anchor": "5",
         "x": -9.273308,
@@ -1385,13 +1385,13 @@
     "Enabled": true
   },
   "OldHitting": {
-    "Mode": 25,
+    "Mode": 19,
     "Speed": 1.0,
     "BlockedX": 0,
     "BlockedY": 0,
     "BlockedZ": 0,
     "X": 0,
-    "Y": 0,
+    "Y": 0.0,
     "Z": 0,
     "Axe": true,
     "Bind": {
@@ -1442,8 +1442,8 @@
       "Locked": false,
       "HUD Position": {
         "anchor": "5",
-        "x": -400.55078,
-        "y": 5.722046E-6
+        "x": -400.05078,
+        "y": 8.372961
       },
       "Scale": 0.9,
       "Show in Chat": true,
@@ -1585,7 +1585,7 @@
     "Enabled": false
   },
   "NameTags": {
-    "Style": 1,
+    "Style": 2,
     "Distance Scale": false,
     "Show GodItem": true,
     "Show Murder": true,
