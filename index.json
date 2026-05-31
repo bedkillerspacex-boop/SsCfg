@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-31T12:51:19Z",
+  "generatedAt": "2026-05-31T12:51:49Z",
   "maxPackId": 9,
   "packs": [
     {
@@ -66,12 +66,12 @@
       "summary": "伊雷娜cfg目前sca死号",
       "type": "暴力",
       "version": 1,
-      "date": "2026-05-31T12:49:45Z",
+      "date": "2026-05-31T12:51:47Z",
       "southsideVersion": "20260524",
-      "sha256": "ab98b72ba4808c178df15479c02bc061f133b8546c221347fe61ac7163d7aa31",
+      "sha256": "dc1e1cd31814f5ec3d845fd6261d836ad0c3a4a3f86954851ba1e071f70efa7e",
       "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/E1aina1337_cfg.json",
       "fileName": "E1aina1337_cfg.json",
-      "sizeBytes": 31172
+      "sizeBytes": 31019
     },
     {
       "id": 8,
