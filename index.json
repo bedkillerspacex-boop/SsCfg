@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-31T08:11:14Z",
+  "generatedAt": "2026-05-31T08:11:49Z",
   "maxPackId": 6,
   "packs": [
     {
@@ -48,11 +48,11 @@
     {
       "id": 6,
       "name": "NewWzyCFG",
-      "author": "",
+      "author": "NewWzy",
       "summary": "NewWzyCFG",
       "type": "暴力",
       "version": 1,
-      "date": "2026-05-31T08:11:11Z",
+      "date": "2026-05-31T08:11:44Z",
       "southsideVersion": "20260524",
       "sha256": "0a9c786b12dfbf46d37eef56f82290439ebb03d6a55ed16da4e86ec7f12a4380",
       "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/NewWzyCFG.json",
