@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-31T08:20:19Z",
+  "generatedAt": "2026-05-31T08:22:23Z",
   "maxPackId": 8,
   "packs": [
     {
@@ -78,7 +78,7 @@
       "name": "Kaghe傻逼cfg不推荐！！！！",
       "author": "Kaghe",
       "summary": "KagheBeta傻逼cfg",
-      "type": "暴力",
+      "type": "安全",
       "version": 1,
       "date": "2026-05-31T08:19:42Z",
       "southsideVersion": "20260524",
