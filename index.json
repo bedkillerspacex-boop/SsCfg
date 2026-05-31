@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-31T12:51:49Z",
+  "generatedAt": "2026-05-31T12:52:05Z",
   "maxPackId": 9,
   "packs": [
     {
@@ -61,9 +61,9 @@
     },
     {
       "id": 7,
-      "name": "伊雷娜cfg目前sca死号",
+      "name": "伊雷娜cfg",
       "author": "E1aina1337",
-      "summary": "伊雷娜cfg目前sca死号",
+      "summary": "伊雷娜cfg目",
       "type": "暴力",
       "version": 1,
       "date": "2026-05-31T12:51:47Z",
