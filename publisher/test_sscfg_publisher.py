@@ -126,6 +126,17 @@ class SouthsidePublisherTests(unittest.TestCase):
         self.assertEqual(imported_path.stat().st_mtime, float(self.FIXED_TS_1))
         self.assertEqual(sp.source_file_modified_at(repo_dir, source.rel_path), sp.timestamp_to_utc_text(self.FIXED_TS_1))
 
+    def test_import_source_file_accepts_gb18030_json(self) -> None:
+        repo_dir = self.make_repo()
+        external_dir = Path(tempfile.mkdtemp(prefix="southside-publisher-external-"))
+        external_path = external_dir / "gbk-pack.json"
+        external_path.write_bytes('{"name":"测试"}\n'.encode("gb18030"))
+
+        source = sp.import_source_file(repo_dir, external_path)
+
+        self.assertEqual(source.rel_path, "packs/gbk-pack.json")
+        self.assertEqual(sp.read_source_text(repo_dir, source.rel_path), '{"name":"测试"}')
+
     def test_delete_source_file_removes_unpublished_json(self) -> None:
         repo_dir = self.make_repo()
         pack_path = self.write_pack(repo_dir, "demo.json", '{"a":1}\n')

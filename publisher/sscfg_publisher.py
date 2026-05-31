@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import locale
 import os
 import re
 import shutil
@@ -17,6 +18,7 @@ from pathlib import Path, PurePosixPath
 from queue import Empty, Queue
 from tkinter import (
     BOTH,
+    Canvas,
     END,
     LEFT,
     RIGHT,
@@ -152,7 +154,9 @@ def normalize_pack_type(value: object) -> str:
 
 def read_json(path: Path) -> dict:
     try:
-        return json.loads(path.read_text(encoding="utf-8-sig"))
+        return json.loads(read_json_text_file(path))
+    except UnicodeDecodeError as exc:
+        raise PublishError(f"读取 JSON 失败 {path.name}: {exc}") from exc
     except json.JSONDecodeError as exc:
         raise PublishError(f"解析 JSON 失败 {path.name}: {exc}") from exc
 
@@ -168,6 +172,39 @@ def sha256_bytes(content: bytes) -> str:
 
 def published_source_bytes(content: bytes) -> bytes:
     return content.replace(b"\r\n", b"\n")
+
+
+def candidate_text_encodings() -> list[str]:
+    candidates = ["utf-8-sig", "utf-8"]
+    preferred = locale.getpreferredencoding(False)
+    if preferred:
+        candidates.append(preferred)
+    candidates.extend(["gb18030", "gbk", "utf-16"])
+    seen: set[str] = set()
+    result: list[str] = []
+    for encoding in candidates:
+        normalized = encoding.lower()
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        result.append(encoding)
+    return result
+
+
+def decode_json_text_bytes(content: bytes, source_name: str) -> str:
+    last_error: UnicodeDecodeError | None = None
+    for encoding in candidate_text_encodings():
+        try:
+            return content.decode(encoding)
+        except UnicodeDecodeError as exc:
+            last_error = exc
+    if last_error is not None:
+        raise PublishError(f"读取 JSON 失败 {source_name}: {last_error}") from last_error
+    raise PublishError(f"读取 JSON 失败 {source_name}: 未找到可用编码")
+
+
+def read_json_text_file(path: Path) -> str:
+    return decode_json_text_bytes(path.read_bytes(), path.name)
 
 
 def normalize_owner_repo(value: str) -> str:
@@ -504,7 +541,7 @@ def import_source_file(repo_dir: Path, selected_path: Path) -> SourcePack:
         pass
     if file_path.suffix.lower() != ".json":
         raise PublishError(f"only .json files can be imported: {file_path.name}")
-    validate_source_json_text(file_path.read_text(encoding="utf-8-sig"), file_path.name)
+    validate_source_json_text(read_json_text_file(file_path), file_path.name)
     source_file = normalize_source_file(f"packs/{normalize_source_file_name(file_path.name)}")
     target_path = source_path_for_file(repo_dir, source_file)
     if target_path.exists():
@@ -542,7 +579,7 @@ def read_source_text(repo_dir: Path, source_file: str) -> str:
     path = source_path_for_file(repo_dir, source_file)
     if not path.exists():
         return ""
-    return normalize_source_editor_text(path.read_text(encoding="utf-8-sig"))
+    return normalize_source_editor_text(read_json_text_file(path))
 
 
 def validate_source_json_text(text: str, source_file: str) -> None:
@@ -998,7 +1035,7 @@ class PublisherApp(Tk):
         super().__init__()
         self.title("Southside 发布器")
         self.geometry("1320x860")
-        self.minsize(1120, 760)
+        self.minsize(960, 700)
 
         initial_owner_repo = default_owner_repo()
         initial_repo_dir = preferred_repo_dir(initial_owner_repo)
@@ -1017,6 +1054,7 @@ class PublisherApp(Tk):
         self.record_status_var = StringVar(value="")
         self.record_id_var = StringVar(value="")
         self.record_source_file_var = StringVar(value="")
+        self.record_file_name_var = StringVar(value="")
         self.record_name_var = StringVar(value="")
         self.record_author_var = StringVar(value="")
         self.record_summary_var = StringVar(value="")
@@ -1039,6 +1077,8 @@ class PublisherApp(Tk):
         self.worker_queue: Queue[tuple[str, object]] = Queue()
         self.pending_sync_reload = False
         self.action_buttons: list[ttk.Button] = []
+        self.right_scroll_canvas: Canvas | None = None
+        self.right_scroll_window: int | None = None
 
         self._build_widgets()
         self._bind_dirty_tracking()
@@ -1097,8 +1137,11 @@ class PublisherApp(Tk):
             ttk.Button(action_bar, text="重建索引", command=self.rebuild_index),
             ttk.Button(action_bar, text="提交并推送", command=self.commit_push),
         ]
+        for column in range(4):
+            action_bar.columnconfigure(column, weight=1)
         for index, button in enumerate(self.action_buttons):
-            button.pack(side=LEFT, padx=(0 if index == 0 else 8, 0))
+            row, column = divmod(index, 4)
+            button.grid(row=row, column=column, sticky="ew", padx=4, pady=4)
 
         ttk.Label(frame, textvariable=self.summary_var).pack(anchor=W, pady=(0, 8))
 
@@ -1132,7 +1175,24 @@ class PublisherApp(Tk):
         tree_scroll.pack(side=RIGHT, fill="y")
         self.pack_tree.configure(yscrollcommand=tree_scroll.set)
 
-        editor = ttk.LabelFrame(right, text="当前记录", padding=12)
+        right.columnconfigure(0, weight=1)
+        right.rowconfigure(0, weight=1)
+
+        right_canvas = Canvas(right, highlightthickness=0)
+        right_scrollbar = ttk.Scrollbar(right, orient=VERTICAL, command=right_canvas.yview)
+        right_canvas.configure(yscrollcommand=right_scrollbar.set)
+        right_canvas.grid(row=0, column=0, sticky="nsew")
+        right_scrollbar.grid(row=0, column=1, sticky="ns")
+
+        right_content = ttk.Frame(right_canvas)
+        self.right_scroll_canvas = right_canvas
+        self.right_scroll_window = right_canvas.create_window((0, 0), window=right_content, anchor="nw")
+        right_content.bind("<Configure>", self._on_right_content_configure)
+        right_canvas.bind("<Configure>", self._on_right_canvas_configure)
+        right_canvas.bind("<MouseWheel>", self._on_right_canvas_mousewheel)
+        right_content.bind("<MouseWheel>", self._on_right_canvas_mousewheel)
+
+        editor = ttk.LabelFrame(right_content, text="当前记录", padding=12)
         editor.pack(fill="x")
         editor.columnconfigure(1, weight=1)
 
@@ -1142,35 +1202,38 @@ class PublisherApp(Tk):
         ttk.Label(editor, textvariable=self.record_id_var).grid(row=1, column=1, sticky=W, pady=4)
         ttk.Label(editor, text="源文件").grid(row=2, column=0, sticky=W, pady=4)
         ttk.Label(editor, textvariable=self.record_source_file_var).grid(row=2, column=1, sticky=W, pady=4)
-        ttk.Label(editor, text="名称").grid(row=3, column=0, sticky=W, pady=4)
-        ttk.Entry(editor, textvariable=self.record_name_var).grid(row=3, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="作者").grid(row=4, column=0, sticky=W, pady=4)
-        ttk.Entry(editor, textvariable=self.record_author_var).grid(row=4, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="简介").grid(row=5, column=0, sticky=W, pady=4)
-        ttk.Entry(editor, textvariable=self.record_summary_var).grid(row=5, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="类型").grid(row=6, column=0, sticky=W, pady=4)
-        ttk.Combobox(editor, textvariable=self.record_type_var, state="readonly", values=PACK_TYPE_OPTIONS).grid(row=6, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="版本").grid(row=7, column=0, sticky=W, pady=4)
-        ttk.Entry(editor, textvariable=self.record_version_var).grid(row=7, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="日期").grid(row=8, column=0, sticky=W, pady=4)
-        ttk.Entry(editor, textvariable=self.record_date_var).grid(row=8, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="Southside 版本").grid(row=9, column=0, sticky=W, pady=4)
-        ttk.Entry(editor, textvariable=self.record_southside_version_var).grid(row=9, column=1, sticky="ew", pady=4)
-        ttk.Label(editor, text="重新绑定目标").grid(row=10, column=0, sticky=W, pady=4)
+        ttk.Label(editor, text="JSON 文件名").grid(row=3, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_file_name_var).grid(row=3, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="包名称").grid(row=4, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_name_var).grid(row=4, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="作者").grid(row=5, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_author_var).grid(row=5, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="简介").grid(row=6, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_summary_var).grid(row=6, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="类型").grid(row=7, column=0, sticky=W, pady=4)
+        ttk.Combobox(editor, textvariable=self.record_type_var, state="readonly", values=PACK_TYPE_OPTIONS).grid(row=7, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="版本").grid(row=8, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_version_var).grid(row=8, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="日期").grid(row=9, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_date_var).grid(row=9, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="Southside 版本").grid(row=10, column=0, sticky=W, pady=4)
+        ttk.Entry(editor, textvariable=self.record_southside_version_var).grid(row=10, column=1, sticky="ew", pady=4)
+        ttk.Label(editor, text="重新绑定目标").grid(row=11, column=0, sticky=W, pady=4)
         self.rebind_combo = ttk.Combobox(editor, textvariable=self.rebind_source_var, state="readonly")
-        self.rebind_combo.grid(row=10, column=1, sticky="ew", pady=4)
+        self.rebind_combo.grid(row=11, column=1, sticky="ew", pady=4)
 
-        source_editor = ttk.LabelFrame(right, text="源 JSON", padding=12)
+        source_editor = ttk.LabelFrame(right_content, text="源 JSON", padding=12)
         source_editor.pack(fill=BOTH, expand=True, pady=(10, 0))
         self.source_text = ScrolledText(source_editor, wrap="none", font=("Consolas", 10), height=18)
         self.source_text.pack(fill=BOTH, expand=True)
 
-        ttk.Label(right, text="日志").pack(anchor=W, pady=(10, 4))
-        self.log_box = ScrolledText(right, wrap="word", font=("Consolas", 10), height=18)
+        ttk.Label(right_content, text="日志").pack(anchor=W, pady=(10, 4))
+        self.log_box = ScrolledText(right_content, wrap="word", font=("Consolas", 10), height=18)
         self.log_box.pack(fill=BOTH, expand=True)
 
     def _bind_dirty_tracking(self) -> None:
         for variable in [
+            self.record_file_name_var,
             self.record_name_var,
             self.record_author_var,
             self.record_summary_var,
@@ -1194,6 +1257,25 @@ class PublisherApp(Tk):
         if self.suspend_dirty_tracking:
             return
         self.refresh_dirty_state()
+
+    def _on_right_content_configure(self, _event=None) -> None:
+        if self.right_scroll_canvas is None:
+            return
+        self.right_scroll_canvas.configure(scrollregion=self.right_scroll_canvas.bbox("all"))
+
+    def _on_right_canvas_configure(self, event=None) -> None:
+        if self.right_scroll_canvas is None or self.right_scroll_window is None or event is None:
+            return
+        self.right_scroll_canvas.itemconfigure(self.right_scroll_window, width=event.width)
+
+    def _on_right_canvas_mousewheel(self, event) -> str | None:
+        if self.right_scroll_canvas is None:
+            return None
+        delta = getattr(event, "delta", 0)
+        if delta == 0:
+            return None
+        self.right_scroll_canvas.yview_scroll(int(-delta / 120), "units")
+        return "break"
 
     def refresh_github_status(self) -> None:
         self.github_status_var.set(infer_github_login_status())
@@ -1247,6 +1329,7 @@ class PublisherApp(Tk):
         if self.current_kind is None:
             return None
         return (
+            self.record_file_name_var.get().strip(),
             self.record_name_var.get().strip(),
             self.record_author_var.get().strip(),
             self.record_summary_var.get().strip(),
@@ -1254,7 +1337,6 @@ class PublisherApp(Tk):
             self.record_version_var.get().strip(),
             self.record_date_var.get().strip(),
             self.record_southside_version_var.get().strip(),
-            self.record_source_file_var.get().strip(),
         )
 
     def current_metadata_editor_values(self) -> tuple[str, ...] | None:
@@ -1447,6 +1529,7 @@ class PublisherApp(Tk):
         self.record_status_var.set(status_text)
         self.record_id_var.set(pack_id_text)
         self.record_source_file_var.set(meta.source_file)
+        self.record_file_name_var.set(Path(meta.source_file).name)
         self.record_name_var.set(meta.name)
         self.record_author_var.set(meta.author)
         self.record_summary_var.set(meta.summary)
@@ -1477,6 +1560,7 @@ class PublisherApp(Tk):
                 self.record_status_var.set("")
                 self.record_id_var.set("")
                 self.record_source_file_var.set("")
+                self.record_file_name_var.set("")
                 self.record_name_var.set("")
                 self.record_author_var.set("")
                 self.record_summary_var.set("")
@@ -1666,6 +1750,21 @@ class PublisherApp(Tk):
         source_file = self.record_source_file_var.get().strip()
         return normalize_source_file(source_file)
 
+    def desired_source_file(self) -> str:
+        current_source = self.current_source_file()
+        file_name = normalize_source_file_name(self.record_file_name_var.get().strip() or Path(current_source).name)
+        return normalize_source_file(f"packs/{file_name}")
+
+    def apply_pending_source_rename(self, repo_dir: Path) -> tuple[str, bool]:
+        current_source = self.current_source_file()
+        desired_source = self.desired_source_file()
+        if desired_source == current_source:
+            return current_source, False
+        new_source = rename_source_file(repo_dir, current_source, Path(desired_source).name)
+        self.record_source_file_var.set(new_source)
+        self.record_file_name_var.set(Path(new_source).name)
+        return new_source, True
+
     def persist_current_source_json(self, repo_dir: Path) -> Path:
         source_file = self.current_source_file()
         source_text = self.current_source_snapshot()
@@ -1703,7 +1802,7 @@ class PublisherApp(Tk):
             repo_dir = ensure_repo_dir(str(repo_dir))
             draft_values = self.current_metadata_editor_values()
             should_preserve_metadata = bool(self.metadata_dirty and draft_values is not None)
-            source_file = self.current_source_file()
+            source_file, renamed = self.apply_pending_source_rename(repo_dir)
             path = self.persist_current_source_json(repo_dir)
             self.load_state(repo_dir)
             self.focus_source_file(source_file)
@@ -1713,6 +1812,8 @@ class PublisherApp(Tk):
                 self.loaded_meta_snapshot = loaded_meta_snapshot
                 self.loaded_source_snapshot = self.current_source_snapshot()
                 self.refresh_dirty_state()
+            if renamed:
+                self.log(f"已重命名 JSON 为 {Path(source_file).name}")
             self.log(f"已保存源 JSON: {path}")
             if show_message:
                 messagebox.showinfo("Southside 发布器", "源 JSON 已保存")
@@ -1727,8 +1828,10 @@ class PublisherApp(Tk):
                 raise PublishError("当前记录不能直接保存全部修改")
             repo_dir, _, _ = self.resolve_inputs()
             repo_dir = ensure_repo_dir(str(repo_dir))
-            source_file = self.current_source_file()
+            source_file, renamed = self.apply_pending_source_rename(repo_dir)
             changed_parts: list[str] = []
+            if renamed:
+                changed_parts.append("JSON 文件名")
             if self.source_dirty:
                 self.persist_current_source_json(repo_dir)
                 changed_parts.append("源 JSON")
@@ -1748,8 +1851,10 @@ class PublisherApp(Tk):
     def persist_current_record_for_index(self, repo_dir: Path, publish_unpublished: bool) -> tuple[str | None, bool]:
         if self.current_kind is None:
             return None, False
-        current_source = self.current_source_file()
+        current_source, renamed = self.apply_pending_source_rename(repo_dir)
         changed = False
+        if renamed:
+            changed = True
         if self.source_dirty:
             self.persist_current_source_json(repo_dir)
             changed = True
@@ -1773,11 +1878,14 @@ class PublisherApp(Tk):
                 raise PublishError("请先选择一个未发布的源文件")
             repo_dir, _, _ = self.resolve_inputs()
             repo_dir = ensure_repo_dir(str(repo_dir))
+            source_file, renamed = self.apply_pending_source_rename(repo_dir)
             self.persist_current_source_json(repo_dir)
-            meta = self.build_form_meta(None, self.current_source_file())
+            meta = self.build_form_meta(None, source_file)
             publish_source_file(repo_dir, meta.source_file, meta)
             self.load_state(repo_dir)
             self.focus_source_file(meta.source_file)
+            if renamed:
+                self.log(f"已重命名 JSON 为 {Path(source_file).name}")
             self.log(f"已发布 {meta.source_file}")
             if show_message:
                 messagebox.showinfo("Southside 发布器", "已发布新的包元数据")
@@ -1792,9 +1900,12 @@ class PublisherApp(Tk):
                 raise PublishError("请先选择一个已发布的包")
             repo_dir, _, _ = self.resolve_inputs()
             repo_dir = ensure_repo_dir(str(repo_dir))
+            source_file, renamed = self.apply_pending_source_rename(repo_dir)
             meta = self.persist_current_metadata(repo_dir)
             self.load_state(repo_dir)
-            self.focus_source_file(meta.source_file)
+            self.focus_source_file(source_file)
+            if renamed:
+                self.log(f"已重命名 JSON 为 {Path(source_file).name}")
             self.log(f"已保存 id {meta.pack_id} 的元数据")
             if show_message:
                 messagebox.showinfo("Southside 发布器", "元数据已保存")
