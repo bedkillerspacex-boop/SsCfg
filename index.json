@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-31T08:06:41Z",
+  "generatedAt": "2026-05-31T08:08:55Z",
   "maxPackId": 6,
   "packs": [
     {
@@ -24,11 +24,11 @@
       "summary": "Ryorin的空岛_清洁视觉",
       "type": "安全",
       "version": 1,
-      "date": "2026-05-31T02:10:59Z",
+      "date": "2026-05-31T08:08:52Z",
       "southsideVersion": "",
       "sha256": "391ea2bde69ce625423494bc66340efd00d6caea07adab32e05e88f37a9b1904",
-      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/Ryorin%E7%9A%84%E7%A9%BA%E5%B2%9B_%E6%B8%85%E6%B4%81%E8%A7%86%E8%A7%89.json",
-      "fileName": "Ryorin的空岛_清洁视觉.json",
+      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/Ryorin_SW_clean.json",
+      "fileName": "Ryorin_SW_clean.json",
       "sizeBytes": 31250
     },
     {
