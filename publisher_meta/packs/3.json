@@ -4,9 +4,9 @@
   "name": "Ryorin的空岛_清洁视觉",
   "author": "Ryorin",
   "summary": "Ryorin的空岛_清洁视觉",
-  "type": "安全",
+  "type": "暴力",
   "version": 1,
-  "date": "2026-05-31T08:08:52Z",
+  "date": "2026-05-31T08:22:54Z",
   "southsideVersion": "20260524",
   "sourceFile": "packs/Ryorin_SW_clean.json",
   "createdAt": "2026-05-31T02:11:02Z"
