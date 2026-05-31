@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-31T14:28:37Z",
+  "generatedAt": "2026-05-31T14:32:19Z",
   "maxPackId": 10,
   "packs": [
     {
@@ -32,20 +32,6 @@
       "sizeBytes": 31250
     },
     {
-      "id": 4,
-      "name": "Float-cfg",
-      "author": "Float_Memory",
-      "summary": "Float-cfg",
-      "type": "暴力",
-      "version": 1,
-      "date": "2026-05-31T14:28:00Z",
-      "southsideVersion": "20260524",
-      "sha256": "88293cc45ae277c9106e2454740bc582141a8102431be066636b002633290d8e",
-      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/Float-cfg.json",
-      "fileName": "Float-cfg.json",
-      "sizeBytes": 31016
-    },
-    {
       "id": 6,
       "name": "NewWzyCFG",
       "author": "NewWzy",
@@ -66,7 +52,7 @@
       "summary": "伊雷娜cfg目",
       "type": "暴力",
       "version": 1,
-      "date": "2026-05-31T14:26:12Z",
+      "date": "2026-05-31T14:32:09Z",
       "southsideVersion": "20260524",
       "sha256": "88293cc45ae277c9106e2454740bc582141a8102431be066636b002633290d8e",
       "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/E1aina1337_cfg.json",
