@@ -477,7 +477,7 @@ def source_pack_from_file(repo_dir: Path, source_file: str) -> SourcePack:
     path = source_path_for_file(repo_dir, source_file)
     if not path.exists():
         raise PublishError(f"源文件不存在: {source_file}")
-    content = path.read_bytes()
+    content = published_source_bytes(path.read_bytes())
     return SourcePack(
         path=path,
         rel_path=normalize_source_file(source_file),
@@ -530,7 +530,7 @@ def sidecar_path(repo_dir: Path, pack_id: int) -> Path:
 
 def raw_download_url(owner_repo: str, branch: str, source_file: str) -> str:
     return (
-        f"https://github.com/{normalize_owner_repo(owner_repo)}/raw/refs/heads/"
+        f"https://raw.githubusercontent.com/{normalize_owner_repo(owner_repo)}/refs/heads/"
         f"{quote(clean_string(branch) or DEFAULT_BRANCH, safe='')}/{quote(source_file, safe='/')}"
     )
 

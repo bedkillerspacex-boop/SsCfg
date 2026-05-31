@@ -83,6 +83,17 @@ class SouthsidePublisherTests(unittest.TestCase):
         self.assertEqual(source.size_bytes, len(expected))
         self.assertEqual(source.sha256, sp.sha256_bytes(expected))
 
+    def test_source_pack_from_file_hashes_published_lf_bytes(self) -> None:
+        repo_dir = self.make_repo()
+        path = repo_dir / "packs" / "demo.json"
+        path.write_bytes(b'{\r\n  "a": 1\r\n}\r\n')
+
+        source = sp.source_pack_from_file(repo_dir, "packs/demo.json")
+        expected = b'{\n  "a": 1\n}\n'
+
+        self.assertEqual(source.size_bytes, len(expected))
+        self.assertEqual(source.sha256, sp.sha256_bytes(expected))
+
     def test_create_source_file_creates_json_under_packs(self) -> None:
         repo_dir = self.make_repo()
 
@@ -213,7 +224,7 @@ class SouthsidePublisherTests(unittest.TestCase):
         self.assertEqual(index_data["packs"][0]["id"], 1)
         self.assertEqual(
             index_data["packs"][0]["downloadUrl"],
-            "https://github.com/temp/test/raw/refs/heads/master/packs/demo.json",
+            "https://raw.githubusercontent.com/temp/test/refs/heads/master/packs/demo.json",
         )
 
     def test_unpublish_pack_deletes_binding_but_keeps_max_pack_id_monotonic(self) -> None:
