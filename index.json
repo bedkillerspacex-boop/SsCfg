@@ -1,22 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-31T02:13:03Z",
+  "generatedAt": "2026-05-31T02:24:52Z",
   "maxPackId": 4,
   "packs": [
-    {
-      "id": 1,
-      "name": "test",
-      "author": "",
-      "summary": "demo",
-      "type": "安全",
-      "version": 1,
-      "date": "2026-05-30T09:38:02Z",
-      "southsideVersion": "",
-      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
-      "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/demo.json",
-      "fileName": "demo.json",
-      "sizeBytes": 2
-    },
     {
       "id": 2,
       "name": "BSKCFG",

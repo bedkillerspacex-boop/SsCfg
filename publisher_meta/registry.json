@@ -4,7 +4,6 @@
   "bindings": {
     "packs/BSKCFG.json": 2,
     "packs/Float-cfg.json": 4,
-    "packs/Ryorin的空岛_清洁视觉.json": 3,
-    "packs/demo.json": 1
+    "packs/Ryorin的空岛_清洁视觉.json": 3
   }
 }
