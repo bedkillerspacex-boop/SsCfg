@@ -394,7 +394,7 @@
         82
       ]
     },
-    "Enabled": false
+    "Enabled": true
   },
   "AutoSoup": {
     "Health": 13.0,
@@ -698,10 +698,10 @@
     "Mode": 0,
     "Bind": {
       "keyBinds": [
-        -1
+        76
       ]
     },
-    "Enabled": true
+    "Enabled": false
   },
   "MCF": {
     "Bind": {
@@ -1144,16 +1144,16 @@
     "Enabled": false
   },
   "ChestAura": {
-    "Range": 5.0,
+    "Range": 4.9,
     "Min Delay": 280.0,
-    "Max Delay": 300.0,
+    "Max Delay": 440.0,
     "OpenStolenChest": false,
     "RayCast": true,
     "Ender Chest": false,
-    "NoMove": false,
+    "NoMove": true,
     "Bind": {
       "keyBinds": [
-        -1
+        86
       ]
     },
     "Enabled": false
@@ -1834,7 +1834,7 @@
     "Enabled": false
   },
   "FakerVSBin": {
-    "Scroll Text": "本影片由東方紅對戰平臺傾情贊�?1?7  本影片資源僅供學習交流使�?1?7,切勿用於其他用�?1?7?1?7",
+    "Scroll Text": "本影片由東方紅對戰平臺傾情贊�??1?7  本影片資源僅供學習交流使�??1?7,切勿用於其他用�?1?7?1?7",
     "Font Size": 14.0,
     "Scroll Speed": 2.0,
     "Bind": {
