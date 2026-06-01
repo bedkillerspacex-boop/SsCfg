@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-01T06:28:10Z",
+  "generatedAt": "2026-06-01T10:22:38Z",
   "maxPackId": 10,
   "packs": [
     {
@@ -10,9 +10,9 @@
       "summary": "BSKCFG",
       "type": "暴力",
       "version": 1,
-      "date": "2026-06-01T06:28:06Z",
+      "date": "2026-06-01T10:22:33Z",
       "southsideVersion": "20260524",
-      "sha256": "582e54ff44762ad10cb1766af1ef4aea4cf46b6defaf2ceacf28d66783d556a2",
+      "sha256": "f3a157df124197623c0b1acc083e866b59d3d87d5135bcbf234679620ba0c400",
       "downloadUrl": "https://raw.githubusercontent.com/bedkillerspacex-boop/SsCfg/refs/heads/master/packs/BSKCFGqwq.json",
       "fileName": "BSKCFGqwq.json",
       "sizeBytes": 31268

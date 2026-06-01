@@ -4,7 +4,7 @@
       "Style": 0,
       "No Render Modules": false,
       "Only Bound Modules": true,
-      "Remove Shadow": false,
+      "Remove Shadow": true,
       "Show Suffix": true,
       "Background": false,
       "Round Background": false,
@@ -21,14 +21,14 @@
       },
       "Custom Color B": {
         "hsba": [
-          194,
+          0,
           0,
           100,
-          211
+          255
         ],
         "dataBit": -1
       },
-      "Custom Speed": 10.0,
+      "Custom Speed": 20.0,
       "Locked": false,
       "HUD Position": {
         "anchor": "2",
@@ -173,9 +173,9 @@
   },
   "BowAimAssist": {
     "Fov": 180,
-    "Range": 100,
+    "Range": 15.0,
     "Priority": 0,
-    "AutoRelease": false,
+    "AutoRelease": true,
     "RotationShot": true,
     "Prediction": true,
     "Bind": {
@@ -394,7 +394,7 @@
         82
       ]
     },
-    "Enabled": true
+    "Enabled": false
   },
   "AutoSoup": {
     "Health": 13.0,
@@ -436,7 +436,7 @@
         78
       ]
     },
-    "Enabled": true
+    "Enabled": false
   },
   "GrimFull": {
     "Bind": {
@@ -1438,18 +1438,18 @@
     "Enabled": false
   },
   "WorldManager": {
-    "Time": true,
+    "Time": false,
     "Time Mode": 0,
     "Time Value": 1,
     "Time Speed": 2.0,
-    "Weather": false,
+    "Weather": true,
     "Weather Mode": 0,
     "Bind": {
       "keyBinds": [
         -1
       ]
     },
-    "Enabled": false
+    "Enabled": true
   },
   "TargetHUD": {
     "Mode": 8,
@@ -1834,7 +1834,7 @@
     "Enabled": false
   },
   "FakerVSBin": {
-    "Scroll Text": "本影片由東方紅對戰平臺傾情贊�??1?7  本影片資源僅供學習交流使�??1?7,切勿用於其他用�?1?7?1?7",
+    "Scroll Text": "本影片由東方紅對戰平臺傾情贊�???1?7  本影片資源僅供學習交流使�???1?7,切勿用於其他用�?1?7?1?7",
     "Font Size": 14.0,
     "Scroll Speed": 2.0,
     "Bind": {
